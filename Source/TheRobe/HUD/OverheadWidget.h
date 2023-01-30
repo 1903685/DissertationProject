@@ -16,5 +16,6 @@ class THEROBE_API UOverheadWidget : public UUserWidget
 	
 public:
 	
+	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* DisplayText;
 };
