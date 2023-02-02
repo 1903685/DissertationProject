@@ -8,6 +8,8 @@
 #include "Components/WidgetComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "TheRobe/Weapon/Weapon.h"
+#include "TheRobe/TheRobeComponent/CombatComponent.h"
+
 
 AMainCharacter::AMainCharacter()
 {
@@ -30,6 +32,9 @@ AMainCharacter::AMainCharacter()
 
 	OverheadWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("OverheadWidget"));
 	OverheadWidget->SetupAttachment(RootComponent);
+
+	Combat = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
+	Combat->SetIsReplicated(true);
 
 }
 
@@ -67,9 +72,19 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAxis("MoveRight", this, &AMainCharacter::MoveRight);
 	PlayerInputComponent->BindAxis("Turn", this, &AMainCharacter::Turn);
 	PlayerInputComponent->BindAxis("LookUP", this, &AMainCharacter::LookUP);
+
+	PlayerInputComponent->BindAction("Equip", IE_Pressed, this, &AMainCharacter::EquipButtonActivated);
 }
 
+void AMainCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	if (Combat)
+	{
+		Combat->Character = this;
+	}
 
+}
 
 void AMainCharacter::MoveForward(float _val)
 {
@@ -103,6 +118,30 @@ void AMainCharacter::LookUP(float _val)
 	AddControllerPitchInput(_val);
 }
 
+void AMainCharacter::EquipButtonActivated()
+{
+	if (Combat)
+	{
+		if (HasAuthority())
+		{
+			Combat->EquipWeapon(OverlappingWeapon);
+		}
+		else 
+		{
+			ServerEquipButtonActivated();
+		
+		}
+	}
+}
+
+void AMainCharacter::ServerEquipButtonActivated_Implementation()
+{
+	if (Combat)
+	{
+		Combat->EquipWeapon(OverlappingWeapon);
+	}
+}
+
 void AMainCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 {
 
@@ -122,6 +161,11 @@ void AMainCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 
 	}
 
+}
+
+bool AMainCharacter::IsWeaponEquipped()
+{
+	return (Combat && Combat->EquippedWeapon);
 }
 
 

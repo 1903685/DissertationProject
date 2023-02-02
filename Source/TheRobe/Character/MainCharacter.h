@@ -20,8 +20,8 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void PostInitializeComponents();
 
 protected:
 	// Called when the game starts or when spawned
@@ -31,6 +31,7 @@ protected:
 	void MoveRight(float _val);
 	void Turn(float _val);
 	void LookUP(float _val);
+	void EquipButtonActivated();
 
 private:
 
@@ -49,8 +50,15 @@ private:
 	UFUNCTION()
 	void OnRep_OverlappingWeapon(AWeapon* LastWeapon);
 
+	UPROPERTY(VisibleAnywhere)
+	class UCombatComponent* Combat;
+
+	UFUNCTION(Server, Reliable)
+	void ServerEquipButtonActivated();
+
 
 public:	
 	void SetOverlappingWeapon(AWeapon* Weapon);
+	bool IsWeaponEquipped();
 
 };

@@ -29,6 +29,7 @@ void UMainCharAnimInstance::NativeUpdateAnimation(float dt)
 
 	
 	bIsInAir = MainCharacter->GetCharacterMovement()->IsFalling();
-
 	bIsAccelerating = MainCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0 ? true : false;
+	bWeaponEquipped = MainCharacter->IsWeaponEquipped();
+	
 }
