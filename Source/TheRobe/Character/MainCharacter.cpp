@@ -9,6 +9,7 @@
 #include "Net/UnrealNetwork.h"
 #include "TheRobe/Weapon/Weapon.h"
 #include "TheRobe/TheRobeComponent/CombatComponent.h"
+#include "Components/CapsuleComponent.h"
 
 
 AMainCharacter::AMainCharacter()
@@ -37,6 +38,9 @@ AMainCharacter::AMainCharacter()
 	Combat->SetIsReplicated(true);
 
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
+
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 
 }
 
