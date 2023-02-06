@@ -4,7 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "TheRobe/TheRobeTypes/TurningInPlace.h"
 #include "MainCharacter.generated.h"
+
 
 UCLASS()
 class THEROBE_API AMainCharacter : public ACharacter
@@ -62,8 +64,12 @@ private:
 	void ServerEquipButtonActivated();
 
 	float AO_Yaw;
+	float InterpAO_Yaw;
 	float AO_Pitch;
 	FRotator StartingAimRot;
+
+	ETurningInPlace TurningInPlace;
+	void TurnInPlace(float dt);
 
 public:	
 	void SetOverlappingWeapon(AWeapon* Weapon);
@@ -72,4 +78,5 @@ public:
 	FORCEINLINE float GetAO_Yaw() const { return AO_Yaw; }
 	FORCEINLINE float GetAO_Pitch() const { return AO_Pitch; }
 	AWeapon* GetEquippedWeapon();
+	FORCEINLINE ETurningInPlace GetTurningInPlace() const { return TurningInPlace; }
 };
