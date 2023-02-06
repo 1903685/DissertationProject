@@ -10,6 +10,7 @@
 #include "TheRobe/Weapon/Weapon.h"
 #include "TheRobe/TheRobeComponent/CombatComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 
 AMainCharacter::AMainCharacter()
@@ -63,7 +64,7 @@ void AMainCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	
+	AimOffset(DeltaTime);
 }
 
 
@@ -174,6 +175,39 @@ void AMainCharacter::AimButtonReleased()
 	}
 }
 
+void AMainCharacter::AimOffset(float dt)
+{
+	if (Combat && Combat->EquippedWeapon == nullptr) return;
+
+	FVector Velocity = GetVelocity();
+	Velocity.Z = 0.f;
+	float Speed = Velocity.Size();
+	bool bIsInAir = GetCharacterMovement()->IsFalling();
+
+	if (Speed == 0.f && !bIsInAir)  //standing still and not jumping
+	{
+		FRotator CurrentAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+		FRotator DeltaAimRot = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRot);
+		AO_Yaw = DeltaAimRot.Yaw;
+		bUseControllerRotationYaw = false;
+	}
+	if (Speed > 0.f || bIsInAir) //running or jumping
+	{
+		StartingAimRot = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+		AO_Yaw = 0.f;
+		bUseControllerRotationYaw = true;
+	}
+
+	AO_Pitch = GetBaseAimRotation().Pitch;
+	if (AO_Pitch > 90.f && !IsLocallyControlled())
+	{
+		// map pitch from the range [270, 360] to [-90, 0]
+		FVector2D InRange(270.f, 360.f);
+		FVector2D OutRange(-90.f, 0.f);
+		AO_Pitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AO_Pitch);
+	}
+}
+
 void AMainCharacter::ServerEquipButtonActivated_Implementation()
 {
 	if (Combat)
@@ -211,6 +245,12 @@ bool AMainCharacter::IsWeaponEquipped()
 bool AMainCharacter::IsAiming()
 {
 	return (Combat && Combat->bAiming);
+}
+
+AWeapon* AMainCharacter::GetEquippedWeapon()
+{
+	if (Combat == nullptr) return nullptr;
+	return Combat->EquippedWeapon;
 }
 
 
