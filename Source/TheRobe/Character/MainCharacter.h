@@ -38,7 +38,7 @@ protected:
 	void AimButtonActivated();
 	void AimButtonReleased();
 	void AimOffset(float dt);
-
+	virtual void Jump() override;
 
 private:
 
