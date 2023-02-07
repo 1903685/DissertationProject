@@ -5,6 +5,7 @@
 #include "Components/ActorComponent.h"
 #include "CombatComponent.generated.h"
 
+#define TRACE_LENGHT 80000.f
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class THEROBE_API UCombatComponent : public UActorComponent
@@ -34,10 +35,12 @@ protected:
 	void FireButtonActivated(bool bActivated);
 
 	UFUNCTION(Server, Reliable)
-	void ServerFire();
+	void ServerFire(const FVector_NetQuantize& TraceHitTarget);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastFire();
+	void MulticastFire(const FVector_NetQuantize& TraceHitTarget);
+
+	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
 
 
 private:
@@ -57,6 +60,7 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	bool bFireButtonActivated;
+
 
 public:	
 

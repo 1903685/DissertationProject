@@ -29,7 +29,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	void ShowPickUpWidget(bool bShowWidget);
-	void Fire();
+	virtual void Fire(const FVector& HitTarget);
 
 protected:
 	
@@ -75,6 +75,8 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Weapon Prop")
 	class UAnimationAsset* FireAnim;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class ABulletShell> BulletShellClass;
 
 public:
 	void SetWeaponState(EWeaponState State);

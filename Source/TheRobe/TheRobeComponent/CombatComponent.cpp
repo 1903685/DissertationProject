@@ -8,11 +8,13 @@
 #include "Components/SphereComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "DrawDebugHelpers.h"
 
 UCombatComponent::UCombatComponent()
 {
 
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
 
 	BaseWalkSpeed = 600.f;
 	AimWalkSpeed = 450.f;
@@ -82,33 +84,70 @@ void UCombatComponent::FireButtonActivated(bool bActivated)
 	bFireButtonActivated = bActivated;
 	if (bFireButtonActivated)
 	{
-		ServerFire();
+		FHitResult HitResult;
+		TraceUnderCrosshairs(HitResult);
+		ServerFire(HitResult.ImpactPoint);
 	}
 	
 
 }
 
-void UCombatComponent::ServerFire_Implementation()
+void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 {
-	MulticastFire();
+	FVector2D ViewportSize;
+	if (GEngine && GEngine->GameViewport)
+	{
+		GEngine->GameViewport->GetViewportSize(ViewportSize);
+	}
+
+	//crosshair location is the center of  the viewport
+	FVector2D CrosshairLoc(ViewportSize.X / 2.f, ViewportSize.Y / 2.0f);
+
+	//change from viewport space to world space
+	FVector CrosshairWorldPos;
+	FVector CrosshairWorldDir;
+	bool bIsScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(
+		UGameplayStatics::GetPlayerController(this, 0),
+		CrosshairLoc,
+		CrosshairWorldPos,
+		CrosshairWorldDir
+	);
+
+	if (bIsScreenToWorld)
+	{
+		FVector StartPos = CrosshairWorldPos;
+
+		FVector EndPos = StartPos + CrosshairWorldDir * TRACE_LENGHT;
+
+		GetWorld()->LineTraceSingleByChannel(TraceHitResult,
+			StartPos,
+			EndPos,
+			ECollisionChannel::ECC_Visibility);
+
+	}
+
+}
+
+void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
+{
+
+	MulticastFire(TraceHitTarget);
 }
 
 
-void UCombatComponent::MulticastFire_Implementation()
+void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {
 	if (EquippedWeapon == nullptr) return;
 	if (Character)
 	{
 		Character->PlayFireMontage(bAiming);
-		EquippedWeapon->Fire();
+		EquippedWeapon->Fire(TraceHitTarget);
 	}
 }
 
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	
-
 }
 
 void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
