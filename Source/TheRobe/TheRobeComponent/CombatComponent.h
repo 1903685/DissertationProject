@@ -30,6 +30,15 @@ protected:
 	UFUNCTION()
 	void OnRep_EquippedWeapon();
 
+	UFUNCTION()
+	void FireButtonActivated(bool bActivated);
+
+	UFUNCTION(Server, Reliable)
+	void ServerFire();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastFire();
+
 
 private:
 	class AMainCharacter* Character;
@@ -45,6 +54,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float AimWalkSpeed;
+
+	UPROPERTY(EditAnywhere)
+	bool bFireButtonActivated;
 
 public:	
 

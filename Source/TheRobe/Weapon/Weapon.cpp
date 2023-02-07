@@ -6,6 +6,8 @@
 #include "Components/WidgetComponent.h"
 #include "TheRobe/Character/MainCharacter.h"
 #include "Net/UnrealNetwork.h"
+#include "Animation/AnimationAsset.h"
+#include "Components/SkeletalMeshComponent.h"
 
 // Sets default values
 AWeapon::AWeapon()
@@ -123,5 +125,13 @@ void AWeapon::ShowPickUpWidget(bool bShowWidget)
 		PickUpWidget->SetVisibility(bShowWidget);
 	}
 
+}
+
+void AWeapon::Fire()
+{
+	if (FireAnim)
+	{
+		WeaponMesh->PlayAnimation(FireAnim, false);
+	}
 }
 

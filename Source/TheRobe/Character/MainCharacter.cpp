@@ -11,6 +11,7 @@
 #include "TheRobe/TheRobeComponent/CombatComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "MainCharAnimInstance.h"
 
 
 AMainCharacter::AMainCharacter()
@@ -87,6 +88,8 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &AMainCharacter::CrouchButtonActivated);
 	PlayerInputComponent->BindAction("Aim", IE_Pressed, this, &AMainCharacter::AimButtonActivated);
 	PlayerInputComponent->BindAction("Aim", IE_Released, this, &AMainCharacter::AimButtonReleased);
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AMainCharacter::FireButtonActivated);
+	PlayerInputComponent->BindAction("Fire", IE_Released, this, &AMainCharacter::FireButtonDeactivated);
 
 
 }
@@ -99,6 +102,24 @@ void AMainCharacter::PostInitializeComponents()
 		Combat->Character = this;
 	}
 
+}
+
+void AMainCharacter::PlayFireMontage(bool bIsAiming)
+{
+	if (Combat == nullptr || Combat->EquippedWeapon == nullptr) return;
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && FireMontage)
+	{
+		AnimInstance->Montage_Play(FireMontage);
+	   
+		//section name
+		FName SName;
+		SName = bIsAiming ? FName("RifleAim") : FName("RiffleHip");
+		AnimInstance->Montage_JumpToSection(SName);
+	}
+
+	
 }
 
 void AMainCharacter::MoveForward(float _val)
@@ -229,6 +250,22 @@ void AMainCharacter::Jump()
 	
 	}
 }
+void AMainCharacter::FireButtonActivated()
+{
+	if (Combat)
+	{
+		Combat->FireButtonActivated(true);
+	}
+}
+
+void AMainCharacter::FireButtonDeactivated()
+{
+	if (Combat)
+	{
+		Combat->FireButtonActivated(false);
+	}
+}
+
 void AMainCharacter::TurnInPlace(float dt)
 {
 	if (AO_Yaw > 90.f)
