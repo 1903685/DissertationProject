@@ -14,14 +14,22 @@ class THEROBE_API ABulletShell : public AActor
 public:	
 	ABulletShell();
 
-private:
-	UPROPERTY(VisibleAnywhere)
-	UStaticMeshComponent* ShellMesh;
 
 protected:
 	virtual void BeginPlay() override;
 
-public:	
-	
+	UFUNCTION()
+	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
+
+private:
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* ShellMesh;
+
+	UPROPERTY(EditAnywhere)
+	float ShellEjectionImpulse;
+
+	UPROPERTY(EditAnywhere)
+	class USoundCue* BulletShellSound;
+	
 };
