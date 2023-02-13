@@ -45,8 +45,6 @@ void UMainCharAnimInstance::NativeUpdateAnimation(float dt)
 	DeltaRotation = FMath::RInterpTo(DeltaRotation, DeltaRot, dt, 6.f);
 	YawOffset = DeltaRotation.Yaw;
 
-
-	//
 	CharacterRotationLastFrame = CharacterRotationCurrFrame;
 	CharacterRotationCurrFrame = MainCharacter->GetActorRotation();
 	const FRotator Delta = UKismetMathLibrary::NormalizedDeltaRotator(CharacterRotationCurrFrame, CharacterRotationLastFrame);
@@ -65,5 +63,13 @@ void UMainCharAnimInstance::NativeUpdateAnimation(float dt)
 		MainCharacter->GetMesh()->TransformToBoneSpace(FName("hand_r"), LeftHandTransform.GetLocation(), FRotator::ZeroRotator, OutPosition, OutRotation);
 		LeftHandTransform.SetLocation(OutPosition);
 		LeftHandTransform.SetRotation(FQuat(OutRotation));
+        
+		if (MainCharacter->IsLocallyControlled())
+		{
+			bLocallyControlled = true;
+			FTransform RightHandTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("hand_r"), ERelativeTransformSpace::RTS_World);
+            FRotator LookAtRotation =  UKismetMathLibrary::FindLookAtRotation(RightHandTransform.GetLocation(), RightHandTransform.GetLocation() + (RightHandTransform.GetLocation() - MainCharacter->GetHitTarget()));
+			RightHandRotation = FMath::RInterpTo(RightHandRotation, LookAtRotation, dt, 30.f);
+		}
 	}
 }

@@ -5,11 +5,12 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "TheRobe/TheRobeTypes/TurningInPlace.h"
+#include "TheRobe/Interfaces/CrosshairsInteraction.h"
 #include "MainCharacter.generated.h"
 
 
 UCLASS()
-class THEROBE_API AMainCharacter : public ACharacter
+class THEROBE_API AMainCharacter : public ACharacter, public ICrosshairsInteraction
 {
 	GENERATED_BODY()
 
@@ -85,4 +86,6 @@ public:
 	FORCEINLINE float GetAO_Pitch() const { return AO_Pitch; }
 	AWeapon* GetEquippedWeapon();
 	FORCEINLINE ETurningInPlace GetTurningInPlace() const { return TurningInPlace; }
+	FVector GetHitTarget() const;
+	FORCEINLINE UCameraComponent* GetFollowCamera() const { return CameraFollow; }
 };
