@@ -70,6 +70,7 @@ void AMainCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	AimOffset(DeltaTime);
+	HideCameraWhenCharacterClose();
 }
 
 
@@ -299,6 +300,27 @@ void AMainCharacter::ServerEquipButtonActivated_Implementation()
 }
 
 
+
+void AMainCharacter::HideCameraWhenCharacterClose()
+{
+	if (!IsLocallyControlled()) return;
+	if ((CameraFollow->GetComponentLocation() - GetActorLocation()).Size() < CameraThreshold)
+	{
+		GetMesh()->SetVisibility(false);
+		if (Combat && Combat->EquippedWeapon && Combat->EquippedWeapon->GetWeaponMesh())
+		{
+			Combat->EquippedWeapon->GetWeaponMesh()->bOwnerNoSee = true;
+		}
+	}
+	else
+	{
+		GetMesh()->SetVisibility(true);
+		if (Combat && Combat->EquippedWeapon && Combat->EquippedWeapon->GetWeaponMesh())
+		{
+			Combat->EquippedWeapon->GetWeaponMesh()->bOwnerNoSee = false;
+		}
+	}
+}
 
 void AMainCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 {
