@@ -6,6 +6,8 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Particles/ParticleSystem.h"
 #include "Sound/SoundCue.h"
+#include "TheRobe/Character/MainCharacter.h"
+#include "TheRobe/TheRobe.h"
 
 
 AProjectileActor::AProjectileActor()
@@ -20,6 +22,8 @@ AProjectileActor::AProjectileActor()
 	CollisionBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	CollisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 	CollisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
+	CollisionBox->SetCollisionResponseToChannel(ECC_SkeletalMesh, ECollisionResponse::ECR_Block);
+	
 
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
 	ProjectileMovementComponent->bRotationFollowsVelocity = true;
@@ -51,6 +55,12 @@ void AProjectileActor::BeginPlay()
 
 void AProjectileActor::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+	AMainCharacter* MainCharacter = Cast<AMainCharacter>(OtherActor);
+	if (MainCharacter)
+	{
+		MainCharacter->MulticastHit();
+	}
+
 	Destroy();
 }
 
