@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "TheRobe/TheRobeTypes/TurningInPlace.h"
 #include "TheRobe/Interfaces/CrosshairsInteraction.h"
+#include "Components/TimelineComponent.h"
 #include "MainCharacter.generated.h"
 
 
@@ -27,14 +28,17 @@ public:
 	virtual void PostInitializeComponents();
 	void PlayFireMontage(bool bIsAiming);
 	void PlayHitReactMontage();
-	UFUNCTION(NetMulticast, Unreliable)
-	void MulticastHit();
-
+	void PlayElimMontage();
 	virtual void OnRep_ReplicatedMovement() override;
+	void Elim();
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastElim();
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	void UpdateHealth();
 
 	void MoveForward(float _val);
 	void MoveRight(float _val);
@@ -50,6 +54,9 @@ protected:
 	virtual void Jump() override;
 	void FireButtonActivated();
 	void FireButtonDeactivated();
+	
+	UFUNCTION()
+	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
 	
 private:
 
@@ -88,6 +95,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = Combat)
 	class UAnimMontage* HitReactMontage;
 
+	UPROPERTY(EditAnywhere, Category = Combat)
+	class UAnimMontage* ElimMontage;
+
 
 	void HideCameraWhenCharacterClose();
 	
@@ -104,7 +114,6 @@ private:
 	float CalculateSpeed();
 
 	//Character Health
-
 	UPROPERTY(EditAnywhere, Category = "Player Stats")
 	float MaxHealth = 100.f;
 
@@ -115,6 +124,35 @@ private:
 	void OnRep_Health();
 
 	class AMainCharPlayerController* MainCharPlayerController;
+
+	bool bIsElimmed = false;
+
+	FTimerHandle ElimTimer;
+
+	UPROPERTY(EditDefaultsOnly)
+	float ElimDelay = 3.f;
+
+	void ElimTimerFinished();
+
+	//Disovle effect
+	UPROPERTY(VisibleAnywhere)
+	UTimelineComponent* DisolveTimeLine;
+	FOnTimelineFloat DisolveTrack;
+
+	UPROPERTY(EditAnywhere)
+	UCurveFloat* DisolveCurve;
+	
+	UFUNCTION()
+	void UpdateMaterial(float DisolveVal);
+	void StartMaterial();
+
+	//change at run time
+	UPROPERTY(VisibleAnywhere, Category = Elim)
+	UMaterialInstanceDynamic* DynDisolveMaterialInstance;
+
+	//set on the Blueprint
+	UPROPERTY(EditAnywhere, Category = Elim)
+	UMaterialInstance* DisolveMaterialInstance;
 
 public:	
 	void SetOverlappingWeapon(AWeapon* Weapon);
@@ -127,4 +165,7 @@ public:
 	FVector GetHitTarget() const;
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return CameraFollow; }
 	FORCEINLINE bool ShouldRotateRootBone() const { return bRotateRootBone; }
+	FORCEINLINE bool IsElimmed() const { return bIsElimmed; }
+	FORCEINLINE float GetHealth() const { return Health; }
+	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
 };

@@ -6,12 +6,23 @@
 #include "TheRobe/HUD/CharOverlay.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "TheRobe/Character/MainCharacter.h"
 
 void AMainCharPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
 	MainCharHUD = Cast<AMainCharHUD>(GetHUD());
+}
+void AMainCharPlayerController::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
+
+	AMainCharacter* MainCharacter = Cast<AMainCharacter>(InPawn);
+	if (MainCharacter)
+	{
+		SetHealth(MainCharacter->GetHealth(), MainCharacter->GetMaxHealth());
+	}
 }
 
 void AMainCharPlayerController::SetHealth(float Health, float MaxHealth)
@@ -22,6 +33,7 @@ void AMainCharPlayerController::SetHealth(float Health, float MaxHealth)
 		MainCharHUD->CharacterOverlay &&
 		MainCharHUD->CharacterOverlay->HealthBar
 		&& MainCharHUD->CharacterOverlay->HealthText;
+
 	if (bIsHUDValid)
 	{
 		const float HealthPercent = Health / MaxHealth;

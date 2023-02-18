@@ -16,7 +16,7 @@ class THEROBE_API AMainCharPlayerController : public APlayerController
 
 public:
 	void SetHealth(float Health, float MaxHealth);
-
+	void OnPossess(APawn* InPawn) override;
 protected:
 
 	virtual void BeginPlay() override;

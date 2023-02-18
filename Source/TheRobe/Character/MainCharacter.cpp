@@ -14,6 +14,8 @@
 #include "MainCharAnimInstance.h"
 #include "TheRobe/TheRobe.h"
 #include "TheRobe/PlayerController/MainCharPlayerController.h"
+#include "TheRobe/GameMode/TheRobeGameMode.h"
+#include "TimerManager.h"
 
 
 AMainCharacter::AMainCharacter()
@@ -51,6 +53,8 @@ AMainCharacter::AMainCharacter()
 	TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 	NetUpdateFrequency = 66.f;
 	MinNetUpdateFrequency = 33.0;
+
+	DisolveTimeLine = CreateDefaultSubobject<UTimelineComponent>(TEXT("DissolveTimelineComponent"));
 }
 
 void AMainCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -66,13 +70,14 @@ void AMainCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 void AMainCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	MainCharPlayerController = Cast<AMainCharPlayerController>(Controller);
-	if (MainCharPlayerController)
+	UpdateHealth();
+	if (HasAuthority())
 	{
-		MainCharPlayerController->SetHealth(Health, MaxHealth);
+		OnTakeAnyDamage.AddDynamic(this, &AMainCharacter::ReceiveDamage);
 	}
 	
 }
+
 
 void AMainCharacter::Tick(float DeltaTime)
 {
@@ -155,6 +160,15 @@ void AMainCharacter::PlayHitReactMontage()
 	}
 }
 
+void AMainCharacter::PlayElimMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && ElimMontage)
+	{
+		AnimInstance->Montage_Play(ElimMontage);
+	}
+}
+
 void AMainCharacter::OnRep_ReplicatedMovement()
 {
 	Super::OnRep_ReplicatedMovement();
@@ -162,9 +176,57 @@ void AMainCharacter::OnRep_ReplicatedMovement()
 	TimeSinceLastMovementRep = 0.f;
 }
 
-void AMainCharacter::MulticastHit_Implementation()
+void AMainCharacter::Elim()
 {
-	PlayHitReactMontage();
+	if (Combat && Combat->EquippedWeapon)
+	{
+		Combat->EquippedWeapon->DroppedWeapon();
+	}
+	MulticastElim();
+	GetWorldTimerManager().SetTimer(
+		ElimTimer,
+		this,
+		&AMainCharacter::ElimTimerFinished,
+		ElimDelay
+	);
+}
+
+void AMainCharacter::MulticastElim_Implementation()
+{
+	bIsElimmed = true;
+	PlayElimMontage();
+
+	//start dessolve material effect 
+	if (DisolveMaterialInstance)
+	{
+		DynDisolveMaterialInstance = UMaterialInstanceDynamic::Create(DisolveMaterialInstance, this);
+
+		GetMesh()->SetMaterial(0, DynDisolveMaterialInstance);
+		DynDisolveMaterialInstance->SetScalarParameterValue(TEXT("Disolve"), 0.55f);
+		DynDisolveMaterialInstance->SetScalarParameterValue(TEXT("Glow"), 200.f);
+	}
+
+	StartMaterial();
+
+	//disable movement
+	GetCharacterMovement()->DisableMovement();
+	GetCharacterMovement()->StopMovementImmediately();
+	if (MainCharPlayerController)
+	{
+		DisableInput(MainCharPlayerController);
+	}
+	// Disable collision
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+void AMainCharacter::ElimTimerFinished()
+{
+	ATheRobeGameMode* GameMode = GetWorld()->GetAuthGameMode<ATheRobeGameMode>();
+	if (GameMode)
+	{
+		GameMode->RequestRespawn(this, Controller);
+	}
+
 }
 
 void AMainCharacter::MoveForward(float _val)
@@ -300,8 +362,6 @@ void AMainCharacter::SimProxiesTurn()
 	ProxyRot = GetActorRotation();
 	ProxyYaw = UKismetMathLibrary::NormalizedDeltaRotator(ProxyRot, ProxyRotLastFrame).Yaw;
 
-	UE_LOG(LogTemp, Warning, TEXT("ProxyYaw: %f"), ProxyYaw);
-
 	if (FMath::Abs(ProxyYaw) > TurnTreshhold)
 	{
 		if (ProxyYaw > TurnTreshhold)
@@ -349,6 +409,23 @@ void AMainCharacter::FireButtonDeactivated()
 	{
 		Combat->FireButtonActivated(false);
 	}
+}
+
+void AMainCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser)
+{
+	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
+	UpdateHealth();
+	PlayHitReactMontage();
+	if (Health == 0.f)
+	{
+		ATheRobeGameMode* GameMode = GetWorld()->GetAuthGameMode<ATheRobeGameMode>();
+		if (GameMode)
+		{
+			MainCharPlayerController = MainCharPlayerController == nullptr ? Cast<AMainCharPlayerController>(Controller) : MainCharPlayerController;
+			AMainCharPlayerController* AttackerController = Cast<AMainCharPlayerController>(InstigatorController);
+			GameMode->PlayerEliminated(this, MainCharPlayerController, AttackerController);
+		}
+	}	
 }
 
 void AMainCharacter::TurnInPlace(float dt)
@@ -411,7 +488,35 @@ float AMainCharacter::CalculateSpeed()
 
 void AMainCharacter::OnRep_Health()
 {
+	PlayHitReactMontage();
+	UpdateHealth();
+}
 
+void AMainCharacter::UpdateHealth()
+{
+	MainCharPlayerController = MainCharPlayerController == nullptr ? Cast<AMainCharPlayerController>(Controller) : MainCharPlayerController;
+	if (MainCharPlayerController)
+	{
+		MainCharPlayerController->SetHealth(Health, MaxHealth);
+	}
+}
+
+void AMainCharacter::UpdateMaterial(float DisolveVal)
+{
+	if (DynDisolveMaterialInstance)
+	{
+		DynDisolveMaterialInstance->SetScalarParameterValue(TEXT("Disolve"), DisolveVal);
+	}
+}
+
+void AMainCharacter::StartMaterial()
+{
+	DisolveTrack.BindDynamic(this, &AMainCharacter::UpdateMaterial);
+	if (DisolveCurve && DisolveTimeLine)
+	{
+		DisolveTimeLine->AddInterpFloat(DisolveCurve, DisolveTrack);
+		DisolveTimeLine->Play();
+	}
 }
 
 void AMainCharacter::SetOverlappingWeapon(AWeapon* Weapon)
