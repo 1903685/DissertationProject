@@ -13,6 +13,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "MainCharAnimInstance.h"
 #include "TheRobe/TheRobe.h"
+#include "TheRobe/PlayerController/MainCharPlayerController.h"
 
 
 AMainCharacter::AMainCharacter()
@@ -58,12 +59,18 @@ void AMainCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 
 
 	DOREPLIFETIME_CONDITION(AMainCharacter, OverlappingWeapon,COND_OwnerOnly);
+	DOREPLIFETIME(AMainCharacter, Health);
 
 }
 
 void AMainCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	MainCharPlayerController = Cast<AMainCharPlayerController>(Controller);
+	if (MainCharPlayerController)
+	{
+		MainCharPlayerController->SetHealth(Health, MaxHealth);
+	}
 	
 }
 
@@ -400,6 +407,11 @@ float AMainCharacter::CalculateSpeed()
 	FVector Velocity = GetVelocity();
 	Velocity.Z = 0.f;
 	return Velocity.Size();
+}
+
+void AMainCharacter::OnRep_Health()
+{
+
 }
 
 void AMainCharacter::SetOverlappingWeapon(AWeapon* Weapon)

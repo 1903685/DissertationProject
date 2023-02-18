@@ -13,5 +13,16 @@ UCLASS()
 class THEROBE_API AMainCharPlayerController : public APlayerController
 {
 	GENERATED_BODY()
+
+public:
+	void SetHealth(float Health, float MaxHealth);
+
+protected:
+
+	virtual void BeginPlay() override;
+
+private:
+	class AMainCharHUD* MainCharHUD;
+
 	
 };

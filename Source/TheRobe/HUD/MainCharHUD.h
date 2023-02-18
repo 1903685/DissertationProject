@@ -31,6 +31,15 @@ class THEROBE_API AMainCharHUD : public AHUD
 public:
 	virtual void DrawHUD() override;
 
+	UPROPERTY(EditAnywhere, Category = "Player Stats")
+	TSubclassOf<class UUserWidget> CharacterOverlayClass;
+
+	class UCharOverlay* CharacterOverlay;
+
+protected:
+	virtual void BeginPlay() override;
+	void AddCharaOverlay();
+
 private:
 	FHUDPackage HUDPackage;
 
