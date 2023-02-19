@@ -57,7 +57,10 @@ protected:
 	
 	UFUNCTION()
 	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
-	
+	//poll and init HUD
+	void PollInit();
+
+
 private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Camera")
@@ -123,6 +126,7 @@ private:
 	UFUNCTION()
 	void OnRep_Health();
 
+	UPROPERTY()
 	class AMainCharPlayerController* MainCharPlayerController;
 
 	bool bIsElimmed = false;
@@ -153,6 +157,9 @@ private:
 	//set on the Blueprint
 	UPROPERTY(EditAnywhere, Category = Elim)
 	UMaterialInstance* DisolveMaterialInstance;
+
+	
+	class ATheRobePlayerState* PlayerState;
 
 public:	
 	void SetOverlappingWeapon(AWeapon* Weapon);

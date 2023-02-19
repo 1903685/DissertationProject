@@ -4,6 +4,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "TheRobe/HUD/MainCharHUD.h"
+#include "TheRobe/Weapon/WeaponTypes.h"
 #include "CombatComponent.generated.h"
 
 #define TRACE_LENGHT 80000.f
@@ -49,8 +50,11 @@ protected:
 
 
 private:
+	UPROPERTY()
 	class AMainCharacter* Character;
+	UPROPERTY()
 	class AMainCharPlayerController* Controller;
+	UPROPERTY()
 	class AMainCharHUD* HUD;
 
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
@@ -102,6 +106,23 @@ private:
 	
 	void StartFireTimer();
 	void FireTimerFinished();
+
+	bool CanFire();
+
+	//Carried ammo for the current weapon
+	UPROPERTY(ReplicatedUsing = OnRep_CarriedAmmo)
+	int32 CarriedAmmo;
+
+	UFUNCTION()
+	void OnRep_CarriedAmmo();
+
+	TMap<EWeaponType, int32> CarriedAmmoMap;
+
+	UPROPERTY(EditAnywhere)
+	int32 StartingARAmmo = 30;
+
+	void InitCarriedAmmo();
+
 public:	
 
 	

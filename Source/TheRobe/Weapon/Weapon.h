@@ -4,11 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "WeaponTypes.h"
 #include "Weapon.generated.h"
 
 
 UENUM(BlueprintType)
-enum class EWeaponState : uint8 
+enum class EWeaponState : uint8
 {
 	EWS_Initial   UMETA(DisplayName = "Initial State"),
 	EWS_Equipped  UMETA(DisplayName = "Equipped"),
@@ -22,12 +23,14 @@ UCLASS()
 class THEROBE_API AWeapon : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
-	
+
+public:
+
 	AWeapon();
 	virtual void Tick(float DeltaTime) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void OnRep_Owner() override;
+	void SetHUDAmmunition();
 	void ShowPickUpWidget(bool bShowWidget);
 	virtual void Fire(const FVector& HitTarget);
 	void DroppedWeapon();
@@ -59,64 +62,85 @@ public:
 		bool bAutomatic = true;
 
 protected:
-	
+
 	virtual void BeginPlay() override;
 
 	UFUNCTION()
-	virtual void OnSphereOverlap(
-		UPrimitiveComponent* OverlappedComponent,
-		AActor* OtherActor,
-		UPrimitiveComponent* OtherComp,
-		int32 OtherBodyIndex,
-		bool bFromSweep,
-		const FHitResult& SweepResult
-	);
+		virtual void OnSphereOverlap(
+			UPrimitiveComponent* OverlappedComponent,
+			AActor* OtherActor,
+			UPrimitiveComponent* OtherComp,
+			int32 OtherBodyIndex,
+			bool bFromSweep,
+			const FHitResult& SweepResult
+		);
 
 	UFUNCTION()
-	void OnSphereEndOverlap(
-		UPrimitiveComponent* OverlappedComponent,
-		AActor* OtherActor,
-		UPrimitiveComponent* OtherComp,
-		int32 OtherBodyIndex
-	
-	);
+		void OnSphereEndOverlap(
+			UPrimitiveComponent* OverlappedComponent,
+			AActor* OtherActor,
+			UPrimitiveComponent* OtherComp,
+			int32 OtherBodyIndex
+
+		);
 
 private:
-	
-	UPROPERTY(VisibleAnywhere, Category= "Weapon Prop")
-	USkeletalMeshComponent* WeaponMesh;
+
+	UPROPERTY(VisibleAnywhere, Category = "Weapon Prop")
+		USkeletalMeshComponent* WeaponMesh;
 
 
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Prop")
-	class USphereComponent* AreaSphere;
+		class USphereComponent* AreaSphere;
 
-	UPROPERTY(ReplicatedUsing = OnRep_WeaponState ,VisibleAnywhere, Category = "Weapon Prop")
-	EWeaponState WeaponState;
+	UPROPERTY(ReplicatedUsing = OnRep_WeaponState, VisibleAnywhere, Category = "Weapon Prop")
+		EWeaponState WeaponState;
 
 	UFUNCTION()
-	void OnRep_WeaponState();
+		void OnRep_WeaponState();
 
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Prop")
-	class UWidgetComponent* PickUpWidget;
+		class UWidgetComponent* PickUpWidget;
 
 	UPROPERTY(EditAnywhere, Category = "Weapon Prop")
-	class UAnimationAsset* FireAnim;
+		class UAnimationAsset* FireAnim;
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<class ABulletShell> BulletShellClass;
+		TSubclassOf<class ABulletShell> BulletShellClass;
 
 	//Zoomed FOV while aiming
 	UPROPERTY(EditAnywhere)
-	float ZoomFOV = 30.f;
+		float ZoomFOV = 30.f;
 
 	UPROPERTY(EditAnywhere)
-	float ZoomInterpSpeed = 20.f;
+		float ZoomInterpSpeed = 20.f;
 
-    
+	UPROPERTY(EditAnywhere, ReplicatedUsing = OnRep_Ammunition)
+		int32 Ammunition;
+
+	UFUNCTION()
+		void OnRep_Ammunition();
+
+	void SpendRound();
+
+	UPROPERTY(EditAnywhere)
+		int32 MaxCapacity;
+
+	UPROPERTY()
+		class AMainCharacter* OwnerCharacter;
+
+	UPROPERTY()
+		class AMainCharPlayerController* OwnerController;
+
+	UPROPERTY(EditAnywhere)
+	EWeaponType WeaponType;
+
 public:
 	void SetWeaponState(EWeaponState State);
 	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
 	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh; }
-	FORCEINLINE float GetZoomedFOV() const { return ZoomFOV;}
+	FORCEINLINE float GetZoomedFOV() const { return ZoomFOV; }
 	FORCEINLINE float GetZoomedInterpSpeed() const { return ZoomInterpSpeed; }
+	bool IsEmpty();
+	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
 };

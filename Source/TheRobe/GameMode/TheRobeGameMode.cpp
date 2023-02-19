@@ -6,12 +6,24 @@
 #include "TheRobe/PlayerController/MainCharPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerStart.h"
+#include "TheRobe/PlayerState/TheRobePlayerState.h"
 
 void ATheRobeGameMode::PlayerEliminated(AMainCharacter* ElimmedChar, AMainCharPlayerController* VictimController, AMainCharPlayerController* AttackerController)
 {
+	ATheRobePlayerState* AttackerState = AttackerController ? Cast<ATheRobePlayerState>(AttackerController->PlayerState) : nullptr;
+	ATheRobePlayerState* VictimState = VictimController ? Cast<ATheRobePlayerState>(VictimController->PlayerState) : nullptr;
+	if (AttackerState && AttackerState != VictimState)
+	{
+		AttackerState->AddToScore(1.f);
+	}
+	if (VictimState)
+	{
+		VictimState->AddToDefeats(1);
+	}
 	if (ElimmedChar)
 	{
 		ElimmedChar->Elim();
+
 	}
 }
 

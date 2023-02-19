@@ -42,3 +42,61 @@ void AMainCharPlayerController::SetHealth(float Health, float MaxHealth)
 		MainCharHUD->CharacterOverlay->HealthText->SetText(FText::FromString(HealthText));
 	}
 }
+
+void AMainCharPlayerController::SetHUDScore(float Score)
+{
+	MainCharHUD = MainCharHUD == nullptr ? Cast<AMainCharHUD>(GetHUD()) : MainCharHUD;
+	bool bIsHUDValid = MainCharHUD &&
+		MainCharHUD->CharacterOverlay &&
+		MainCharHUD->CharacterOverlay->ScoreAmount;
+
+	if (bIsHUDValid)
+	{
+		FString ScoreText = FString::Printf(TEXT("%d"), FMath::FloorToInt(Score));
+		MainCharHUD->CharacterOverlay->ScoreAmount->SetText(FText::FromString(ScoreText));
+	}
+}
+
+void AMainCharPlayerController::SetHUDDefeats(int32 Defeats)
+{
+	MainCharHUD = MainCharHUD == nullptr ? Cast<AMainCharHUD>(GetHUD()) : MainCharHUD;
+	bool bIsHUDValid = MainCharHUD &&
+		MainCharHUD->CharacterOverlay &&
+		MainCharHUD->CharacterOverlay->DefeatsAmount;
+
+	if (bIsHUDValid)
+	{
+		FString DefeatsText = FString::Printf(TEXT("%d"), Defeats);
+		MainCharHUD->CharacterOverlay->DefeatsAmount->SetText(FText::FromString(DefeatsText));
+	}
+
+}
+
+void AMainCharPlayerController::SetHudWeaponAmmo(int32 Ammunition)
+{
+	MainCharHUD = MainCharHUD == nullptr ? Cast<AMainCharHUD>(GetHUD()) : MainCharHUD;
+	bool bIsHUDValid = MainCharHUD &&
+		MainCharHUD->CharacterOverlay &&
+		MainCharHUD->CharacterOverlay->WeaponAmmoAmount;
+
+	if (bIsHUDValid)
+	{
+		FString AmmoText = FString::Printf(TEXT("%d"), Ammunition);
+		MainCharHUD->CharacterOverlay->WeaponAmmoAmount->SetText(FText::FromString(AmmoText));
+	}
+
+}
+
+void AMainCharPlayerController::SetHudCarriedAmmo(int32 Ammunition)
+{
+	MainCharHUD = MainCharHUD == nullptr ? Cast<AMainCharHUD>(GetHUD()) : MainCharHUD;
+	bool bIsHUDValid = MainCharHUD &&
+		MainCharHUD->CharacterOverlay &&
+		MainCharHUD->CharacterOverlay->CarriedAmmoAmount;
+
+	if (bIsHUDValid)
+	{
+		FString AmmoText = FString::Printf(TEXT("%d"), Ammunition);
+		MainCharHUD->CharacterOverlay->CarriedAmmoAmount->SetText(FText::FromString(AmmoText));
+	}
+}

@@ -16,6 +16,7 @@
 #include "TheRobe/PlayerController/MainCharPlayerController.h"
 #include "TheRobe/GameMode/TheRobeGameMode.h"
 #include "TimerManager.h"
+#include "TheRobe/PlayerState/TheRobePlayerState.h"
 
 
 AMainCharacter::AMainCharacter()
@@ -97,6 +98,7 @@ void AMainCharacter::Tick(float DeltaTime)
 		CalculatePitch_AO();
 	}
 	HideCameraWhenCharacterClose();
+	PollInit();
 }
 
 void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -193,6 +195,10 @@ void AMainCharacter::Elim()
 
 void AMainCharacter::MulticastElim_Implementation()
 {
+	if (MainCharPlayerController)
+	{
+		MainCharPlayerController->SetHudWeaponAmmo(0);
+	}
 	bIsElimmed = true;
 	PlayElimMontage();
 
@@ -426,6 +432,19 @@ void AMainCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UDa
 			GameMode->PlayerEliminated(this, MainCharPlayerController, AttackerController);
 		}
 	}	
+}
+
+void AMainCharacter::PollInit()
+{
+	if (PlayerState == nullptr)
+	{
+		PlayerState = GetPlayerState<ATheRobePlayerState>();
+		if (PlayerState)
+		{
+			PlayerState->AddToScore(0.f);
+			PlayerState->AddToDefeats(0);
+		}
+	}
 }
 
 void AMainCharacter::TurnInPlace(float dt)
