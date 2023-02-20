@@ -5,6 +5,7 @@
 #include "Components/ActorComponent.h"
 #include "TheRobe/HUD/MainCharHUD.h"
 #include "TheRobe/Weapon/WeaponTypes.h"
+#include "TheRobe/TheRobeTypes/CombatState.h"
 #include "CombatComponent.generated.h"
 
 #define TRACE_LENGHT 80000.f
@@ -22,6 +23,10 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	void EquipWeapon(class AWeapon* WeaponToEquip);
+	void Reload();
+
+	UFUNCTION(BlueprintCallable)
+	void FinishReload();
 
 protected:
 	virtual void BeginPlay() override;
@@ -47,6 +52,14 @@ protected:
 	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
 
 	void SetHUDCrosshairs(float DeltaTime);
+
+	UFUNCTION(Server, Reliable)
+	void ServerReload();
+
+
+	void HandleReload();
+
+	int32 ReloadAmount();
 
 
 private:
@@ -122,6 +135,14 @@ private:
 	int32 StartingARAmmo = 30;
 
 	void InitCarriedAmmo();
+
+	UPROPERTY(ReplicatedUsing = OnRep_CobatState)
+	ECombatState CombatState = ECombatState::ECS_Unoccupied;
+
+	UFUNCTION()
+	void OnRep_CobatState();
+
+	void UpdateAmmunationVal();
 
 public:	
 

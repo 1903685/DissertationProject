@@ -34,6 +34,7 @@ public:
 	void ShowPickUpWidget(bool bShowWidget);
 	virtual void Fire(const FVector& HitTarget);
 	void DroppedWeapon();
+	void AddAmmunition(int32 AmmoToAdd);
 	/**
 	* Textures for the weapon crosshairs
 	*/
@@ -60,6 +61,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = Comabat)
 		bool bAutomatic = true;
+
+	UPROPERTY(EditAnywhere)
+	class USoundCue* EquipSound;
 
 protected:
 
@@ -143,4 +147,7 @@ public:
 	FORCEINLINE float GetZoomedInterpSpeed() const { return ZoomInterpSpeed; }
 	bool IsEmpty();
 	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
+	FORCEINLINE int32 GetAmmo() const { return Ammunition;}
+	FORCEINLINE int32 GetMagCapacity() const{ return MaxCapacity; }
+
 };

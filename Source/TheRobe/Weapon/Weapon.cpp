@@ -230,6 +230,12 @@ void AWeapon::DroppedWeapon()
 	OwnerController = nullptr;
 }
 
+void AWeapon::AddAmmunition(int32 AmmoToAdd)
+{
+	Ammunition = FMath::Clamp(Ammunition - AmmoToAdd, 0, MaxCapacity);
+	SetHUDAmmunition();
+}
+
 
 bool AWeapon::IsEmpty()
 {

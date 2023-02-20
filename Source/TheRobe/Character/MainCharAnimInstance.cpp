@@ -6,6 +6,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "TheRobe/Weapon/Weapon.h"
+#include "TheRobe/TheRobeTypes/CombatState.h"
 
 void UMainCharAnimInstance::NativeInitializeAnimation()
 {
@@ -74,4 +75,8 @@ void UMainCharAnimInstance::NativeUpdateAnimation(float dt)
 			RightHandRotation = FMath::RInterpTo(RightHandRotation, LookAtRotation, dt, 30.f);
 		}
 	}
+
+	bUseFabrik = MainCharacter->GetCombatState() != ECombatState::ECS_Reloading;
+	bUseAimOffsets = MainCharacter->GetCombatState() != ECombatState::ECS_Reloading;
+	bRightHandTransform = MainCharacter->GetCombatState() != ECombatState::ECS_Reloading;
 }

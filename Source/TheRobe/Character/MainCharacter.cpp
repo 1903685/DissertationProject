@@ -17,6 +17,7 @@
 #include "TheRobe/GameMode/TheRobeGameMode.h"
 #include "TimerManager.h"
 #include "TheRobe/PlayerState/TheRobePlayerState.h"
+#include "TheRobe/Weapon/WeaponTypes.h"
 
 
 AMainCharacter::AMainCharacter()
@@ -119,6 +120,7 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction("Aim", IE_Released, this, &AMainCharacter::AimButtonReleased);
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AMainCharacter::FireButtonActivated);
 	PlayerInputComponent->BindAction("Fire", IE_Released, this, &AMainCharacter::FireButtonDeactivated);
+	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &AMainCharacter::ReloadButtonActivated);
 
 
 }
@@ -145,6 +147,27 @@ void AMainCharacter::PlayFireMontage(bool bIsAiming)
 		//section name
 		FName SName;
 		SName = bIsAiming ? FName("RifleAim") : FName("RiffleHip");
+		AnimInstance->Montage_JumpToSection(SName);
+	}
+}
+
+void AMainCharacter::PlayReloadMontage()
+{
+	if (Combat == nullptr || Combat->EquippedWeapon == nullptr) return;
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && ReloadMontage)
+	{
+		AnimInstance->Montage_Play(ReloadMontage);
+		//section name
+		FName SName;
+		switch (Combat->EquippedWeapon->GetWeaponType())
+		{
+		case EWeaponType::EWT_AssaultRifle:
+			SName = FName("Rifle");
+			break;
+		}
+		
 		AnimInstance->Montage_JumpToSection(SName);
 	}
 }
@@ -294,6 +317,14 @@ void AMainCharacter::CrouchButtonActivated()
 		Crouch();
 	}
 	
+}
+
+void AMainCharacter::ReloadButtonActivated()
+{
+	if (Combat)
+	{
+		Combat->Reload();
+	}
 }
 
 void AMainCharacter::AimButtonActivated()
@@ -581,7 +612,6 @@ FVector AMainCharacter::GetHitTarget() const
 	return Combat->HitTarget;
 }
 
-
 void AMainCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 {
 	if (OverlappingWeapon)
@@ -593,6 +623,12 @@ void AMainCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 	{
 		LastWeapon->ShowPickUpWidget(false);
 	}
+}
+
+ECombatState AMainCharacter::GetCombatState() const
+{
+	if (Combat == nullptr) return ECombatState::ECS_MAX;
+	return Combat->CombatState;
 }
 
 
