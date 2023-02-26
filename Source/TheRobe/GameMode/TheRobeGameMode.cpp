@@ -8,6 +8,30 @@
 #include "GameFramework/PlayerStart.h"
 #include "TheRobe/PlayerState/TheRobePlayerState.h"
 
+ATheRobeGameMode::ATheRobeGameMode()
+{
+	bDelayedStart = true;
+}
+
+
+void ATheRobeGameMode::BeginPlay()
+{
+	LevelStartingTime = GetWorld()->GetTimeSeconds();
+}
+
+void ATheRobeGameMode::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	if (MatchState == MatchState::WaitingToStart)
+	{
+		CountDownTimer = WarmupTimer - GetWorld()->GetTimeSeconds() + LevelStartingTime;
+		if (CountDownTimer <= 0.f)
+		{
+			StartMatch();
+		}
+	}
+}
+
 void ATheRobeGameMode::PlayerEliminated(AMainCharacter* ElimmedChar, AMainCharPlayerController* VictimController, AMainCharPlayerController* AttackerController)
 {
 	ATheRobePlayerState* AttackerState = AttackerController ? Cast<ATheRobePlayerState>(AttackerController->PlayerState) : nullptr;

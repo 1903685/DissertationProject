@@ -15,7 +15,19 @@ class THEROBE_API ATheRobeGameMode : public AGameMode
 	GENERATED_BODY()
 
 public:
+	ATheRobeGameMode();
+	virtual void Tick(float DeltaTime) override;
 	virtual void PlayerEliminated(class AMainCharacter* ElimmedChar, class AMainCharPlayerController* VictimController, AMainCharPlayerController* AttackerController);
 	virtual void RequestRespawn(ACharacter* ElimmedChar, AController* ElimmedController);
+
+	UPROPERTY(EditDefaultsOnly)
+	float WarmupTimer = 10.f;
+
+	float LevelStartingTime = 0.f;
+
+protected:
+	virtual void BeginPlay() override;
+private:
+	float CountDownTimer = 0.f;
 
 };
