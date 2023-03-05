@@ -19,6 +19,22 @@ void ATheRobeGameMode::BeginPlay()
 	LevelStartingTime = GetWorld()->GetTimeSeconds();
 }
 
+void ATheRobeGameMode::OnMatchStateSet()
+{
+	Super::OnMatchStateSet();
+
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It) 
+	{
+	
+		AMainCharPlayerController* MainPlayer = Cast<AMainCharPlayerController>(*It);
+		if (MainPlayer)
+		{
+			MainPlayer->OnMatchStateSet(MatchState);
+		}
+	
+	}
+}
+
 void ATheRobeGameMode::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);

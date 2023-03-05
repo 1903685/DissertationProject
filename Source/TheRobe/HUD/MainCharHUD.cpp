@@ -4,12 +4,11 @@
 #include "MainCharHUD.h"
 #include "GameFramework/PlayerController.h"
 #include "CharOverlay.h"
-
+#include "Messages.h"
 
 void AMainCharHUD::BeginPlay()
 {
 	Super::BeginPlay();
-	AddCharaOverlay();
 }
 
 void AMainCharHUD::AddCharaOverlay()
@@ -21,6 +20,17 @@ void AMainCharHUD::AddCharaOverlay()
 		CharacterOverlay->AddToViewport();
 	}
 }
+
+void AMainCharHUD::AddMessages()
+{
+	APlayerController* PlayerController = GetOwningPlayerController();
+	if (PlayerController && MessagesClass && Messages == nullptr)
+	{
+		Messages = CreateWidget<UMessages>(PlayerController, MessagesClass);
+		Messages->AddToViewport();
+	}
+}
+
 void AMainCharHUD::DrawHUD()
 {
 	Super::DrawHUD();

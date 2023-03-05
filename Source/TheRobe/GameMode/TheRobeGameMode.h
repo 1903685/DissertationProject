@@ -23,10 +23,14 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	float WarmupTimer = 10.f;
 
+	UPROPERTY(EditDefaultsOnly)
+	float MatchTimer = 120.f;
+
 	float LevelStartingTime = 0.f;
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void OnMatchStateSet() override;
 private:
 	float CountDownTimer = 0.f;
 
