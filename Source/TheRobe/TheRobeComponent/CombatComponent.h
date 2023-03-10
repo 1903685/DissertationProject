@@ -28,6 +28,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void FinishReload();
 
+	bool IsReloadingLocally = false;
+
 protected:
 	virtual void BeginPlay() override;
 	void SetAiming(bool bIsAiming);
@@ -42,6 +44,7 @@ protected:
 	void FireButtonActivated(bool bActivated);
 
 	void Fire();
+	void LocalFire(const FVector_NetQuantize& TraceHitTarget);
 
 	UFUNCTION(Server, Reliable)
 	void ServerFire(const FVector_NetQuantize& TraceHitTarget);
@@ -73,8 +76,13 @@ private:
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
 	AWeapon* EquippedWeapon;
 
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing = OnRep_Aim)
 	bool bAiming;
+
+	bool IsAimButtonPressed = false;
+
+	UFUNCTION()
+	void OnRep_Aim();
 
 	UPROPERTY(EditAnywhere)
 	float BaseWalkSpeed;

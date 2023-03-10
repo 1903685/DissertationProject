@@ -77,6 +77,10 @@ void UMainCharAnimInstance::NativeUpdateAnimation(float dt)
 	}
 
 	bUseFabrik = MainCharacter->GetCombatState() != ECombatState::ECS_Reloading;
+	if (MainCharacter->IsLocallyControlled())
+	{
+		bUseFabrik = !MainCharacter->IsReloadingLocally();
+	}
 	bUseAimOffsets = MainCharacter->GetCombatState() != ECombatState::ECS_Reloading;
 	bRightHandTransform = MainCharacter->GetCombatState() != ECombatState::ECS_Reloading;
 }

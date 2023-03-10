@@ -119,16 +119,25 @@ private:
 	UPROPERTY(EditAnywhere)
 		float ZoomInterpSpeed = 20.f;
 
-	UPROPERTY(EditAnywhere, ReplicatedUsing = OnRep_Ammunition)
+	UPROPERTY(EditAnywhere)
 		int32 Ammunition;
 
-	UFUNCTION()
-		void OnRep_Ammunition();
+	UFUNCTION(Client, Reliable)
+	void UpdateAmmoClient(int32 ServerAmmo);
+
+	UFUNCTION(Client, Reliable)
+	void AddAmmoClient(int32 AmmoToAdd);
+
+	/*UFUNCTION()
+	void OnRep_Ammunition();*/
 
 	void SpendRound();
 
 	UPROPERTY(EditAnywhere)
 		int32 MaxCapacity;
+
+	// The number of processed server requiests for Ammo
+	int32 Sequence = 0;
 
 	UPROPERTY()
 		class AMainCharacter* OwnerCharacter;

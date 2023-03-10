@@ -63,6 +63,9 @@ protected:
 	UFUNCTION(Client, Reliable)
 	void ClientJoin(FName State, float WarmUp, float Match, float StartTimer);
 
+	void PingWarning();
+	void StopPingWarning();
+	void CheckPing(float DeltaTime);
 
 private:
 	UPROPERTY()
@@ -88,4 +91,17 @@ private:
 	float HUDMaxHealth;
 	float HUDScore;
 	int32 HUDDefeats;
+
+	float PingWarningRunningTime = 0.f;
+
+	UPROPERTY(EditAnywhere)
+	float PingWarningDuration = 5.f;
+
+	float PingAnimationRunningTime = 0.f;
+
+	UPROPERTY(EditAnywhere)
+	float CheckPingFrequency = 20.f;
+
+	UPROPERTY(EditAnywhere)
+	float PingThreshold = 50.f;
 };

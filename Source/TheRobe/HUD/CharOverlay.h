@@ -36,6 +36,9 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* MatchCountdownText;
 
-
+	UPROPERTY(meta = (BindWidget))
+	class UImage* PingWarningImage;
 	
+	UPROPERTY(meta = (BindWidgetAnim), Transient)
+	UWidgetAnimation* PingWarningAnimation;
 };

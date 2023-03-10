@@ -631,6 +631,12 @@ ECombatState AMainCharacter::GetCombatState() const
 	return Combat->CombatState;
 }
 
+bool AMainCharacter::IsReloadingLocally()
+{
+	if (Combat == nullptr) return false;
+	return Combat->IsReloadingLocally;
+}
+
 
 
 

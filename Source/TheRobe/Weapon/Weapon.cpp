@@ -41,13 +41,10 @@ void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (HasAuthority())
-	{
 		AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		AreaSphere->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 		AreaSphere->OnComponentBeginOverlap.AddDynamic(this, &AWeapon::OnSphereOverlap);
 		AreaSphere->OnComponentEndOverlap.AddDynamic(this, &AWeapon::OnSphereEndOverlap);
-	}
 
 	if (PickUpWidget)
 	{
@@ -67,7 +64,7 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AWeapon, WeaponState);
-	DOREPLIFETIME(AWeapon, Ammunition);
+	//DOREPLIFETIME(AWeapon, Ammunition);
 }
 
 
@@ -128,17 +125,49 @@ void AWeapon::SetHUDAmmunition()
 	}
 }
 
-
 void AWeapon::SpendRound()
 {
-	Ammunition = FMath::Clamp(Ammunition - 1, 0, MaxCapacity);
+   Ammunition = FMath::Clamp(Ammunition - 1, 0, MaxCapacity);
    SetHUDAmmunition();
+   if (HasAuthority())
+   {
+	   UpdateAmmoClient(Ammunition);
+   }
+   else
+   {
+	   ++Sequence;
+   }
 }
 
-void AWeapon::OnRep_Ammunition()
+
+void AWeapon::UpdateAmmoClient_Implementation(int32 ServerAmmo)
 {
+	if (HasAuthority()) return;
+    Ammunition = ServerAmmo;
+	--Sequence;
+	Ammunition -= Sequence;
 	SetHUDAmmunition();
 }
+
+void AWeapon::AddAmmunition(int32 AmmoToAdd)
+{
+	Ammunition = FMath::Clamp(Ammunition + AmmoToAdd, 0, MaxCapacity);
+	SetHUDAmmunition();
+	AddAmmoClient(AmmoToAdd);
+}
+
+void AWeapon::AddAmmoClient_Implementation(int32 AmmoToAdd)
+{
+	if(HasAuthority()) return;
+	Ammunition = FMath::Clamp(Ammunition + AmmoToAdd, 0, MaxCapacity);
+	OwnerCharacter = OwnerCharacter == nullptr ? Cast<AMainCharacter>(GetOwner()) : OwnerCharacter;
+	SetHUDAmmunition();
+}
+
+//void AWeapon::OnRep_Ammunition()
+//{
+//	SetHUDAmmunition();
+//}
 void AWeapon::OnRep_Owner()
 {
 	Super::OnRep_Owner();
@@ -214,10 +243,9 @@ void AWeapon::Fire(const FVector& HitTarget)
 			}
 
 		}
-
 	}
-
-	SpendRound();
+	
+		SpendRound();
 }
 
 void AWeapon::DroppedWeapon()
@@ -228,12 +256,6 @@ void AWeapon::DroppedWeapon()
 	SetOwner(nullptr);
 	OwnerCharacter = nullptr;
 	OwnerController = nullptr;
-}
-
-void AWeapon::AddAmmunition(int32 AmmoToAdd)
-{
-	Ammunition = FMath::Clamp(Ammunition - AmmoToAdd, 0, MaxCapacity);
-	SetHUDAmmunition();
 }
 
 

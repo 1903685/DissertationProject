@@ -11,6 +11,8 @@
 #include "TheRobe/GameMode/TheRobeGameMode.h"
 #include "TheRobe/HUD/Messages.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/Image.h"
+#include "TheRobe/PlayerState/TheRobePlayerState.h"
 
 void AMainCharPlayerController::BeginPlay()
 {
@@ -42,6 +44,37 @@ void AMainCharPlayerController::Tick(float DeltaTime)
 	SetMatchTime();
 	CheckTimeSync(DeltaTime);
 	PollInit();
+	CheckPing(DeltaTime);
+	
+}
+void AMainCharPlayerController::CheckPing(float DeltaTime)
+{
+	PingWarningRunningTime += DeltaTime;
+	if (PingWarningRunningTime > CheckPingFrequency)
+	{
+		PlayerState = PlayerState == nullptr ? GetPlayerState<APlayerState>() : PlayerState;
+		if (PlayerState)
+		{
+			if (PlayerState->GetPing() * 4 > PingThreshold)
+			{
+				PingWarning();
+				PingAnimationRunningTime = 0.f;
+			}
+		}
+		PingWarningRunningTime = 0.f;
+	}
+	bool bPingWarningAnimPlaying =
+		MainCharHUD && MainCharHUD->CharacterOverlay &&
+		MainCharHUD->CharacterOverlay->PingWarningAnimation &&
+		MainCharHUD->CharacterOverlay->IsAnimationPlaying(MainCharHUD->CharacterOverlay->PingWarningAnimation);
+	if (bPingWarningAnimPlaying)
+	{
+		PingAnimationRunningTime += DeltaTime;
+		if (PingAnimationRunningTime > PingWarningDuration)
+		{
+			StopPingWarning();
+		}
+	}
 }
 void AMainCharPlayerController::CheckTimeSync(float DeltaTime)
 {
@@ -52,6 +85,43 @@ void AMainCharPlayerController::CheckTimeSync(float DeltaTime)
 		RunningTimeSync = 0.f;
 	}
 }
+void AMainCharPlayerController::PingWarning()
+{
+	MainCharHUD = MainCharHUD == nullptr ? Cast<AMainCharHUD>(GetHUD()) : MainCharHUD;
+
+	bool bIsHUDValid = MainCharHUD &&
+		MainCharHUD->CharacterOverlay &&
+		MainCharHUD->CharacterOverlay->PingWarningImage
+		&& MainCharHUD->CharacterOverlay->PingWarningAnimation;
+
+	if (bIsHUDValid)
+	{
+		MainCharHUD->CharacterOverlay->PingWarningImage->SetOpacity(1.f);
+		MainCharHUD->CharacterOverlay->PlayAnimation(
+			MainCharHUD->CharacterOverlay->PingWarningAnimation,
+			0.f,
+			5);
+	}
+}
+void AMainCharPlayerController::StopPingWarning()
+{
+	MainCharHUD = MainCharHUD == nullptr ? Cast<AMainCharHUD>(GetHUD()) : MainCharHUD;
+
+	bool bIsHUDValid = MainCharHUD &&
+		MainCharHUD->CharacterOverlay &&
+		MainCharHUD->CharacterOverlay->PingWarningImage
+		&& MainCharHUD->CharacterOverlay->PingWarningAnimation;
+
+	if (bIsHUDValid)
+	{
+		MainCharHUD->CharacterOverlay->PingWarningImage->SetOpacity(0.f);
+		if (MainCharHUD->CharacterOverlay->IsAnimationPlaying(MainCharHUD->CharacterOverlay->PingWarningAnimation))
+		{
+			MainCharHUD->CharacterOverlay->StopAnimation(MainCharHUD->CharacterOverlay->PingWarningAnimation);
+		}
+	}
+}
+
 void AMainCharPlayerController::ClientJoin_Implementation(FName State, float WarmUp, float Match, float StartTimer)
 {
 	WarmUpTime = WarmUp;
