@@ -36,6 +36,8 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastElim();
 
+	UPROPERTY()
+	TMap<FName, class UBoxComponent*> HitCollisionBoxes;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -63,6 +65,62 @@ protected:
 	//poll and init HUD
 	void PollInit();
 
+	//box component
+	// Hit boxes used for lag compensation algorithm
+	UPROPERTY(EditAnywhere)
+	class UBoxComponent* head;
+
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* pelvis;
+
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* spine_02;
+
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* spine_03;
+
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* upperarm_l;
+
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* upperarm_r;
+
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* lowerarm_l;
+
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* lowerarm_r;
+
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* hand_l;
+
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* hand_r;
+
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* rucksack;
+
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* blanket;
+
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* thigh_left;
+
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* thigh_right;
+
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* calf_left;
+
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* calf_right;
+
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* foot_left;
+
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* foot_right;
+
 
 private:
 
@@ -81,8 +139,13 @@ private:
 	UFUNCTION()
 	void OnRep_OverlappingWeapon(AWeapon* LastWeapon);
 
+
+	//Main character components
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UCombatComponent* Combat;
+
+	UPROPERTY(VisibleAnywhere)
+	class ULatencyCompensationComponent* LCC;
 
 	UFUNCTION(Server, Reliable)
 	void ServerEquipButtonActivated();
