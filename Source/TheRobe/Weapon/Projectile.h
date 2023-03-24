@@ -21,7 +21,8 @@ private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class AProjectileActor> ProjectileClass;
 
-
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class AProjectileActor> LCAProjectileClass;
 
 	
 };

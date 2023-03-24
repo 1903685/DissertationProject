@@ -30,6 +30,8 @@ public:
 	virtual void ReceivedPlayer() override;
 	void OnMatchStateSet(FName MState);
 	void MatchHasStarted();
+
+	float SingleTTripTime = 0.f;
 protected:
 
 	virtual void BeginPlay() override;

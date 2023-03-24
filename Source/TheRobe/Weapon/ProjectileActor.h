@@ -16,6 +16,16 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void Destroyed() override;
 
+	bool bUseLagCompensation = false;
+	FVector_NetQuantize TraceStart;
+	FVector_NetQuantize100 InitVelocity;
+
+	UPROPERTY(EditAnywhere)
+	float InitSpeed = 150000;
+
+	UPROPERTY(EditAnywhere)
+	float Damage = 20.f;
+
 protected:
 	
 	virtual void BeginPlay() override;
@@ -23,15 +33,12 @@ protected:
 	UFUNCTION()
 	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
-	UPROPERTY(EditAnywhere)
-		float Damage = 20.f;
+	UPROPERTY(VisibleAnywhere)
+	class UProjectileMovementComponent* ProjectileMovementComponent;
 private:
 
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* CollisionBox;
-
-	UPROPERTY(VisibleAnywhere)
-	class UProjectileMovementComponent* ProjectileMovementComponent;
 
 	UPROPERTY(EditAnywhere)
 	class UParticleSystem* Tracer;

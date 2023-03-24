@@ -248,4 +248,5 @@ public:
 	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
 	ECombatState GetCombatState() const;
 	bool IsReloadingLocally();
+	FORCEINLINE ULatencyCompensationComponent* GetLatencyCompensation() const { return LCC; }
 };

@@ -328,7 +328,8 @@ void AMainCharPlayerController::ServerRequestServerTime_Implementation(float cli
 void AMainCharPlayerController::ClientReportServerTime_Implementation(float TimeOfClient, float ServerReceivedTime)
 {
 	float RTT = GetWorld()->GetTimeSeconds() - TimeOfClient;
-	float ServerTime = ServerReceivedTime + (0.5 * RTT);
+	SingleTTripTime = 0.5 * RTT;
+	float ServerTime = ServerReceivedTime + SingleTTripTime;
 	ClientServerDelta = ServerTime - GetWorld()->GetTimeSeconds();
 }
 

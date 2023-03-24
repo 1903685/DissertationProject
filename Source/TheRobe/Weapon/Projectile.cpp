@@ -8,13 +8,11 @@
 void AProjectile::Fire(const FVector& HitTarget)
 {
 	Super::Fire(HitTarget);
-
-	if (!HasAuthority()) return;
 	
-
 	APawn* InstigatorPawn = Cast<APawn>(GetOwner());
 	const USkeletalMeshSocket* MuzzleSocket = GetWeaponMesh()->GetSocketByName(FName("MuzzleFlash"));
-	if (MuzzleSocket)
+	UWorld* World = GetWorld();
+	if (MuzzleSocket && World)
 	{
 		FTransform SockTransform = MuzzleSocket->GetSocketTransform(GetWeaponMesh());
 
@@ -22,20 +20,73 @@ void AProjectile::Fire(const FVector& HitTarget)
 		FVector ToTarget = HitTarget - SockTransform.GetLocation();
 		FRotator TargetRot = ToTarget.Rotation();
 
-		if (ProjectileClass && InstigatorPawn)
+		FActorSpawnParameters SpawnParameters;
+		SpawnParameters.Owner = GetOwner();
+		SpawnParameters.Instigator = InstigatorPawn;
+		
+		AProjectileActor* SpawnedProj = nullptr;
+		if (bUseLagCompensation)
 		{
-			FActorSpawnParameters SpawnParameters;
-			SpawnParameters.Owner = GetOwner();
-			SpawnParameters.Instigator = InstigatorPawn;
-			UWorld* World = GetWorld();
-			if (World)
+			if (InstigatorPawn->HasAuthority()) //server
 			{
-				World->SpawnActor<AProjectileActor>(
+				if (InstigatorPawn->IsLocallyControlled()) //server, host - use replicated projectile
+				{
+					SpawnedProj = World->SpawnActor<AProjectileActor>(
+						ProjectileClass,
+						SockTransform.GetLocation(),
+						TargetRot,
+						SpawnParameters);
+					SpawnedProj->bUseLagCompensation = false;
+					SpawnedProj->Damage = Damage;
+				}
+				else  //server, not locally controlled - spawn not replicated proj  
+				{
+					SpawnedProj = World->SpawnActor<AProjectileActor>(
+						LCAProjectileClass,
+						SockTransform.GetLocation(),
+						TargetRot,
+						SpawnParameters);
+				     	SpawnedProj->bUseLagCompensation = true;
+				
+				}
+			}
+			else // client using LCA
+			{
+				if (InstigatorPawn->IsLocallyControlled()) //spawn non replicated proj, use LCA
+				{
+					SpawnedProj = World->SpawnActor<AProjectileActor>(
+						LCAProjectileClass,
+						SockTransform.GetLocation(),
+						TargetRot,
+						SpawnParameters);
+					 SpawnedProj->bUseLagCompensation = true;
+					 SpawnedProj->TraceStart = SockTransform.GetLocation();
+					 SpawnedProj->InitVelocity = SpawnedProj->GetActorForwardVector() * SpawnedProj->InitSpeed;
+					 SpawnedProj->Damage = Damage;
+				}
+				else // client not locally controlled - spawn non replicated Proj, not using LCA
+				{
+					SpawnedProj = World->SpawnActor<AProjectileActor>(
+						LCAProjectileClass,
+						SockTransform.GetLocation(),
+						TargetRot,
+						SpawnParameters);
+					SpawnedProj->bUseLagCompensation = false;
+				
+				}
+			}
+		}
+		else  // wepon not using LCA
+		{
+			if (InstigatorPawn->HasAuthority())
+			{
+				SpawnedProj = World->SpawnActor<AProjectileActor>(
 					ProjectileClass,
 					SockTransform.GetLocation(),
 					TargetRot,
-					SpawnParameters
-					);
+					SpawnParameters);
+				SpawnedProj->bUseLagCompensation = false;
+				SpawnedProj->Damage = Damage;
 			}
 		}
 	}

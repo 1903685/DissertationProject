@@ -88,6 +88,18 @@ protected:
 
 		);
 
+	UPROPERTY(EditAnywhere)
+	bool bUseLagCompensation = false;
+
+	UPROPERTY()
+		class AMainCharacter* OwnerCharacter;
+
+	UPROPERTY()
+	class AMainCharPlayerController* OwnerController;
+
+	UPROPERTY(EditAnywhere)
+	float Damage = 20.f;
+
 private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Prop")
@@ -120,7 +132,7 @@ private:
 		float ZoomInterpSpeed = 20.f;
 
 	UPROPERTY(EditAnywhere)
-		int32 Ammunition;
+	int32 Ammunition;
 
 	UFUNCTION(Client, Reliable)
 	void UpdateAmmoClient(int32 ServerAmmo);
@@ -134,16 +146,10 @@ private:
 	void SpendRound();
 
 	UPROPERTY(EditAnywhere)
-		int32 MaxCapacity;
+	int32 MaxCapacity;
 
 	// The number of processed server requiests for Ammo
 	int32 Sequence = 0;
-
-	UPROPERTY()
-		class AMainCharacter* OwnerCharacter;
-
-	UPROPERTY()
-		class AMainCharPlayerController* OwnerController;
 
 	UPROPERTY(EditAnywhere)
 	EWeaponType WeaponType;
@@ -158,5 +164,6 @@ public:
 	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
 	FORCEINLINE int32 GetAmmo() const { return Ammunition;}
 	FORCEINLINE int32 GetMagCapacity() const{ return MaxCapacity; }
+	FORCEINLINE float GetDamage() const { return Damage; }
 
 };
