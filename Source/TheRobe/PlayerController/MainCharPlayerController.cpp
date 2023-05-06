@@ -252,6 +252,10 @@ void AMainCharPlayerController::SetHUDMatchCountdown(float time)
 
 	if (bIsHUDValid)
 	{
+		if (time < 0.f)
+		{
+			MainCharHUD->CharacterOverlay->MatchCountdownText->SetText(FText());
+		}
 		int32 Min = FMath::FloorToInt(time / 60);
 		int32 Sec = time - Min * 60;
 		FString CountdownText = FString::Printf(TEXT("%02d:%02d"), Min, Sec);
@@ -267,6 +271,11 @@ void AMainCharPlayerController::SetHUDMessagesCountdown(float time)
 
 	if (bIsHUDValid)
 	{
+		if (time < 0.f)
+		{
+			MainCharHUD->Messages->WarmupTimer->SetText(FText());
+			return;
+		}
 		int32 Min = FMath::FloorToInt(time / 60);
 		int32 Sec = time - Min * 60;
 		FString CountdownText = FString::Printf(TEXT("%02d:%02d"), Min, Sec);
@@ -286,6 +295,21 @@ void AMainCharPlayerController::SetMatchTime()
 	}
 
 	uint32 SecondsLeft = FMath::CeilToInt(TimeLeft);
+
+
+	if (HasAuthority())
+	{
+		if (TheRobeGameMode == nullptr)
+		{
+			TheRobeGameMode = Cast<ATheRobeGameMode>(UGameplayStatics::GetGameMode(this));
+			StartTime = TheRobeGameMode->LevelStartingTime;
+		}
+		TheRobeGameMode = TheRobeGameMode == nullptr ? Cast<ATheRobeGameMode>(UGameplayStatics::GetGameMode(this)) : TheRobeGameMode;
+		if (TheRobeGameMode)
+		{
+			SecondsLeft = FMath::CeilToInt(TheRobeGameMode->GetCountdownTime() + StartTime);
+		}
+	}
 	if (Countdown != SecondsLeft)
 	{
 		if (MatchState == MatchState::WaitingToStart)
@@ -298,6 +322,19 @@ void AMainCharPlayerController::SetMatchTime()
 		}
 
 	}
+	/*
+	if (Countdown != SecondsLeft)
+	{
+		if (MatchState == MatchState::WaitingToStart)
+		{
+			SetHUDMessagesCountdown(TimeLeft);
+		}
+		if (MatchState == MatchState::InProgress)
+		{
+			SetHUDMatchCountdown(TimeLeft);
+		}
+	}*/
+
 	Countdown = SecondsLeft;
 }
 

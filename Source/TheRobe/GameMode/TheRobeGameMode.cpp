@@ -38,13 +38,19 @@ void ATheRobeGameMode::OnMatchStateSet()
 void ATheRobeGameMode::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (MatchState == MatchState::WaitingToStart)
+	if (bDelayedStart && MatchState == MatchState::WaitingToStart)
 	{
 		CountDownTimer = WarmupTimer - GetWorld()->GetTimeSeconds() + LevelStartingTime;
 		if (CountDownTimer <= 0.f)
 		{
 			StartMatch();
+		
 		}
+	}
+	else if (MatchState == MatchState::InProgress)
+	{
+		CountDownTimer = WarmupTimer + MatchTimer - GetWorld()->GetTimeSeconds() + LevelStartingTime;
+		
 	}
 }
 

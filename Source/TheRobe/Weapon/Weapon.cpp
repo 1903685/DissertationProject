@@ -88,6 +88,7 @@ void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 	{
 		MainCharacter->SetOverlappingWeapon(nullptr);
 	}
+
 }
 
 void AWeapon::OnRep_WeaponState()

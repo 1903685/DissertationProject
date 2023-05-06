@@ -76,7 +76,7 @@ void AProjectile::Fire(const FVector& HitTarget)
 				}
 			}
 		}
-		else  // wepon not using LCA
+		else  // weapon not using LCA
 		{
 			if (InstigatorPawn->HasAuthority())
 			{

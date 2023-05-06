@@ -73,6 +73,9 @@ private:
 	UPROPERTY()
 	class AMainCharHUD* MainCharHUD;
 
+	UPROPERTY()
+	class ATheRobeGameMode* TheRobeGameMode;
+
 	float StartTime = 0.f;
 	float MatchTime = 0.f;
 	float WarmUpTime = 0.f;
