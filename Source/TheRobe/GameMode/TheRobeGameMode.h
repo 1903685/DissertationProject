@@ -24,7 +24,7 @@ public:
 	float WarmupTimer = 10.f;
 
 	UPROPERTY(EditDefaultsOnly)
-	float MatchTimer = 120.f;
+	float MatchTimer = 300.f;
 
 	float LevelStartingTime = 0.f;
 

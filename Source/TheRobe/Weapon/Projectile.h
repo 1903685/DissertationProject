@@ -17,6 +17,7 @@ class THEROBE_API AProjectile : public AWeapon
 public:
 	virtual void Fire(const FVector& HitTarget);
 
+
 private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class AProjectileActor> ProjectileClass;
@@ -24,5 +25,4 @@ private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class AProjectileActor> LCAProjectileClass;
 
-	
 };

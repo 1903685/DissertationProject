@@ -132,7 +132,7 @@ private:
 		float ZoomInterpSpeed = 20.f;
 
 	UPROPERTY(EditAnywhere)
-	int32 Ammunition;
+		int32 Ammunition;
 
 	UFUNCTION(Client, Reliable)
 	void UpdateAmmoClient(int32 ServerAmmo);

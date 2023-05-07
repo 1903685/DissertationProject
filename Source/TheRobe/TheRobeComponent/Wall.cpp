@@ -34,6 +34,7 @@ void AWall::BeginPlay()
 		AreaBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		AreaBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 		AreaBox->OnComponentBeginOverlap.AddDynamic(this, &AWall::OnOverlapBegin);
+		AreaBox->OnComponentEndOverlap.AddDynamic(this, &AWall::OnEndOverlap);
 
 	}
 }
@@ -43,8 +44,8 @@ void AWall::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* Oth
 	AMainCharacter* MainChar = Cast<AMainCharacter>(OtherActor);
 	if (MainChar)
 	{
-		MainChar->NetUpdateFrequency = 80.f;
-		MainChar->MinNetUpdateFrequency = 40.f;
+		MainChar->NetUpdateFrequency = 90.f;
+		MainChar->MinNetUpdateFrequency = 45.f;
 	}
 }
 
@@ -62,6 +63,5 @@ void AWall::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* Other
 void AWall::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 

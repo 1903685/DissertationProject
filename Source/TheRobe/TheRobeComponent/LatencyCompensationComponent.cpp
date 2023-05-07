@@ -161,8 +161,8 @@ FLagCompensationResult ULatencyCompensationComponent::ProjConfirmHit(const Frame
 	PathParams.ProjectileRadius = 5.f;
 	PathParams.TraceChannel = ECC_HitBox;
 	PathParams.ActorsToIgnore.Add(GetOwner());
-	PathParams.DrawDebugTime = 5.f;
-	PathParams.DrawDebugType = EDrawDebugTrace::ForDuration;
+	//PathParams.DrawDebugTime = 5.f;
+	//PathParams.DrawDebugType = EDrawDebugTrace::ForDuration;
 
 	FPredictProjectilePathResult PathResult;
 	UGameplayStatics::PredictProjectilePath(this, PathParams, PathResult);
@@ -174,7 +174,7 @@ FLagCompensationResult ULatencyCompensationComponent::ProjConfirmHit(const Frame
 			UBoxComponent* Box = Cast<UBoxComponent>(PathResult.HitResult.Component);
 			if (Box)
 			{
-				DrawDebugBox(GetWorld(), Box->GetComponentLocation(), Box->GetScaledBoxExtent(), FQuat(Box->GetComponentRotation()), FColor::Red, false, 8.f);
+				//DrawDebugBox(GetWorld(), Box->GetComponentLocation(), Box->GetScaledBoxExtent(), FQuat(Box->GetComponentRotation()), FColor::Red, false, 8.f);
 			}
 		}
 		ResetBoxes(HitChar, CurrFrame);
@@ -201,7 +201,7 @@ FLagCompensationResult ULatencyCompensationComponent::ProjConfirmHit(const Frame
 				UBoxComponent* Box = Cast<UBoxComponent>(PathResult.HitResult.Component);
 				if (Box)
 				{
-					DrawDebugBox(GetWorld(), Box->GetComponentLocation(), Box->GetScaledBoxExtent(), FQuat(Box->GetComponentRotation()), FColor::Blue, false, 8.f);
+					//DrawDebugBox(GetWorld(), Box->GetComponentLocation(), Box->GetScaledBoxExtent(), FQuat(Box->GetComponentRotation()), FColor::Blue, false, 8.f);
 				}
 			}
 			ResetBoxes(HitChar, CurrFrame);
@@ -356,21 +356,21 @@ FramePackage ULatencyCompensationComponent::GetFrameToCheck(AMainCharacter* HitC
 	return FrameToCheck;
 }
 
-
-void ULatencyCompensationComponent::Score_Request_Implementation(AMainCharacter* HitChar, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime, AWeapon* DamageSource)
-{
-	FLagCompensationResult Confirm = LagCompensationAlgorithm(HitChar, TraceStart, HitLocation, HitTime);
-	if (Character && HitChar && DamageSource && Confirm.bIsHitConfirmed) 
-	{
-
-	}
-	
-}
+//
+//void ULatencyCompensationComponent::Score_Request_Implementation(AMainCharacter* HitChar, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime, AWeapon* DamageSource)
+//{
+//	FLagCompensationResult Confirm = LagCompensationAlgorithm(HitChar, TraceStart, HitLocation, HitTime);
+//	if (Character && HitChar && DamageSource && Confirm.bIsHitConfirmed) 
+//	{
+//
+//	}
+//	
+//}
 
 void ULatencyCompensationComponent::ProjectileServerScoreRequest_Implementation(AMainCharacter* HitChar, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100& InitVelocity, float HitTime)
 {
 	FLagCompensationResult Confirm = ProjectileLagCompensation(HitChar, TraceStart, InitVelocity, HitTime);
-	if (Character && HitChar && Confirm.bIsHitConfirmed)
+	if (Character && HitChar && Confirm.bIsHitConfirmed && Character->GetEquippedWeapon())
 	{
 		UGameplayStatics::ApplyDamage(
 			HitChar,

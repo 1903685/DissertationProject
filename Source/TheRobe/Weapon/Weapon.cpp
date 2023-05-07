@@ -134,7 +134,7 @@ void AWeapon::SpendRound()
    {
 	   UpdateAmmoClient(Ammunition);
    }
-   else
+   else if (OwnerCharacter && OwnerCharacter->IsLocallyControlled())
    {
 	   ++Sequence;
    }

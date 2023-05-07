@@ -73,14 +73,14 @@ public:
 		float HitTime
 	);
 
-	UFUNCTION(Server, Reliable)
-	void Score_Request(
-		AMainCharacter* HitChar,
-		const FVector_NetQuantize& TraceStart,
-		const FVector_NetQuantize& HitLocation,
-		float HitTime,
-		class AWeapon* DamageSource
-	);
+	//UFUNCTION(Server, Reliable)
+	//void Score_Request(
+	//	AMainCharacter* HitChar,
+	//	const FVector_NetQuantize& TraceStart,
+	//	const FVector_NetQuantize& HitLocation,
+	//	float HitTime,
+	//	class AWeapon* DamageSource
+	//);
 
 	UFUNCTION(Server, Reliable)
 	void ProjectileServerScoreRequest(

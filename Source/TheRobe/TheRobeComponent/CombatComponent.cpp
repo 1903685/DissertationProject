@@ -86,12 +86,19 @@ void UCombatComponent::Fire()
 	if (CanFire())
 	{
 		bCanFire = false;
-		ServerFire(HitTarget);
+
+		if (EquippedWeapon && Character)
+		{
+			if (!Character->HasAuthority()) LocalFire(HitTarget);
+			ServerFire(HitTarget);
+		}
+		
+		/*ServerFire(HitTarget);
 		LocalFire(HitTarget);
 		if (EquippedWeapon)
 		{
 			CrosshairShootFac = .75f;
-		}
+		}*/
 		StartFireTimer();
 	}
 }

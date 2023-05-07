@@ -62,7 +62,7 @@ void AProjectile::Fire(const FVector& HitTarget)
 					 SpawnedProj->bUseLagCompensation = true;
 					 SpawnedProj->TraceStart = SockTransform.GetLocation();
 					 SpawnedProj->InitVelocity = SpawnedProj->GetActorForwardVector() * SpawnedProj->InitSpeed;
-					 SpawnedProj->Damage = Damage;
+					 //SpawnedProj->Damage = Damage;
 				}
 				else // client not locally controlled - spawn non replicated Proj, not using LCA
 				{
