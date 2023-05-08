@@ -65,6 +65,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	class USoundCue* EquipSound;
 
+	UPROPERTY(EditAnywhere)
+	bool bUseLagCompensation = false;
+
 protected:
 
 	virtual void BeginPlay() override;
@@ -88,8 +91,6 @@ protected:
 
 		);
 
-	UPROPERTY(EditAnywhere)
-	bool bUseLagCompensation = false;
 
 	UPROPERTY()
 		class AMainCharacter* OwnerCharacter;

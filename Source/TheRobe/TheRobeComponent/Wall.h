@@ -46,6 +46,9 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Wall Properties")
 	class UBoxComponent* AreaBox;
 
+	UPROPERTY()
+	class AWeapon* Weapon;
+
 public:	
 	
 };

@@ -189,7 +189,7 @@ void AMainCharacter::Tick(float DeltaTime)
 	HideCameraWhenCharacterClose();
 	PollInit();
 
-	UE_LOG(LogTemp, Warning, TEXT("The float value is: %f"), NetUpdateFrequency);
+	//UE_LOG(LogTemp, Warning, TEXT("The float value is: %f"), NetUpdateFrequency);
 }
 
 void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

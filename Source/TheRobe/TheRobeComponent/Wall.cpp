@@ -4,6 +4,7 @@
 #include "Wall.h"
 #include "Components/BoxComponent.h"
 #include "TheRobe/Character/MainCharacter.h"
+#include "TheRobe/Weapon/Weapon.h"
 
 // Sets default values
 AWall::AWall()
@@ -44,6 +45,7 @@ void AWall::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* Oth
 	AMainCharacter* MainChar = Cast<AMainCharacter>(OtherActor);
 	if (MainChar)
 	{
+	
 		MainChar->NetUpdateFrequency = 90.f;
 		MainChar->MinNetUpdateFrequency = 45.f;
 	}
