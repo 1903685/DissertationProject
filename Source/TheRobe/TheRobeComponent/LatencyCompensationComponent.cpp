@@ -6,6 +6,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
 #include "TheRobe/TheRobe.h"
+#include "Wall.h"
 
 ULatencyCompensationComponent::ULatencyCompensationComponent()
 {
@@ -286,6 +287,8 @@ void ULatencyCompensationComponent::FramePackageStory(const FramePackage& Pack, 
 }
 FLagCompensationResult  ULatencyCompensationComponent::LagCompensationAlgorithm(AMainCharacter* HitChar, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime)
 {
+	AWall* wall;
+	
 	FramePackage FrameToCheck = GetFrameToCheck(HitChar, HitTime);
 	return ConfirmHit(FrameToCheck, HitChar, TraceStart, HitLocation);
 }
