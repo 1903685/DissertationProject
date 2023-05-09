@@ -73,15 +73,6 @@ public:
 		float HitTime
 	);
 
-	//UFUNCTION(Server, Reliable)
-	//void Score_Request(
-	//	AMainCharacter* HitChar,
-	//	const FVector_NetQuantize& TraceStart,
-	//	const FVector_NetQuantize& HitLocation,
-	//	float HitTime,
-	//	class AWeapon* DamageSource
-	//);
-
 	UFUNCTION(Server, Reliable)
 	void ProjectileServerScoreRequest(
 		AMainCharacter* HitChar,
@@ -89,7 +80,10 @@ public:
 		const FVector_NetQuantize100& InitVelocity,
 		float HitTime
 	);
-	
+
+	UPROPERTY()
+	bool outOfTheBox = false;
+
 protected:
 	
 	virtual void BeginPlay() override;
@@ -121,6 +115,10 @@ private:
 
 	UPROPERTY()
 	AMainCharacter* Character;
+
+	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = "true"))
+	class AWall* wall;
+
 
 	UPROPERTY()
 	class AMainCharPlayerController* Controller;

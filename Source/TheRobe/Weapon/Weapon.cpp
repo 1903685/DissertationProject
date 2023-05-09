@@ -8,9 +8,11 @@
 #include "Net/UnrealNetwork.h"
 #include "Animation/AnimationAsset.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/BoxComponent.h"
 #include "BulletShell.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "TheRobe/PlayerController/MainCharPlayerController.h"
+#include "TheRobe/TheRobeComponent/Wall.h"
 
 // Sets default values
 AWeapon::AWeapon()
@@ -33,6 +35,8 @@ AWeapon::AWeapon()
 
 	PickUpWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("PickUpWidget"));
 	PickUpWidget->SetupAttachment(RootComponent);
+
+	wall = CreateDefaultSubobject<AWall>(FName("wall"));
 
 }
 
@@ -64,6 +68,7 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 
 	DOREPLIFETIME(AWeapon, WeaponState);
 	//DOREPLIFETIME(AWeapon, Ammunition);
+	DOREPLIFETIME_CONDITION(AWeapon, bUseLagCompensation, COND_OwnerOnly);
 }
 
 

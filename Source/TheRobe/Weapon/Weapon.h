@@ -65,8 +65,12 @@ public:
 	UPROPERTY(EditAnywhere)
 	class USoundCue* EquipSound;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(Replicated, EditAnywhere)
 	bool bUseLagCompensation = false;
+
+
+	UPROPERTY()
+	class AWall* wall;
 
 protected:
 

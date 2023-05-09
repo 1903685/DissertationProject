@@ -6,6 +6,8 @@
 #include "TheRobe/Character/MainCharacter.h"
 #include "TheRobe/Weapon/Weapon.h"
 
+
+
 // Sets default values
 AWall::AWall()
 {
@@ -42,13 +44,15 @@ void AWall::BeginPlay()
 
 void AWall::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	
 	AMainCharacter* MainChar = Cast<AMainCharacter>(OtherActor);
 	if (MainChar)
 	{
-	
+		insideTheBox = 1;
 		MainChar->NetUpdateFrequency = 90.f;
 		MainChar->MinNetUpdateFrequency = 45.f;
 	}
+	UE_LOG(LogTemp, Log, TEXT("Bool value is: %d"), insideTheBox);
 }
 
 void AWall::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
@@ -56,9 +60,12 @@ void AWall::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* Other
 	AMainCharacter* MainChar = Cast<AMainCharacter>(OtherActor);
 	if (MainChar)
 	{
+		insideTheBox = 0;
 		MainChar->NetUpdateFrequency = 66.f;
 		MainChar->MinNetUpdateFrequency = 33.f;
 	}
+
+	UE_LOG(LogTemp, Log, TEXT("Bool value is: %d"), insideTheBox);
 }
 
 

@@ -8,15 +8,16 @@
 #include "TheRobe/TheRobe.h"
 #include "Wall.h"
 
+
 ULatencyCompensationComponent::ULatencyCompensationComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+	wall = CreateDefaultSubobject<AWall>(FName("wall"));
 }
 
 void ULatencyCompensationComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 void ULatencyCompensationComponent::FramePackageSaver(FramePackage& Pack)
@@ -152,7 +153,6 @@ FLagCompensationResult ULatencyCompensationComponent::ProjConfirmHit(const Frame
 	UBoxComponent* Head = HitChar->HitCollisionBoxes[FName("head")];
 	Head->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	Head->SetCollisionResponseToChannel(ECC_HitBox, ECollisionResponse::ECR_Block);
-
 	FPredictProjectilePathParams PathParams;
 	PathParams.bTraceWithCollision = true;
 	PathParams.MaxSimTime = MaxHistoryTime;
@@ -168,7 +168,7 @@ FLagCompensationResult ULatencyCompensationComponent::ProjConfirmHit(const Frame
 	FPredictProjectilePathResult PathResult;
 	UGameplayStatics::PredictProjectilePath(this, PathParams, PathResult);
 
-	if (PathResult.HitResult.bBlockingHit) //hit the head
+	if (PathResult.HitResult.bBlockingHit) //hit the head and outside the wall's collision box
 	{
 		if (PathResult.HitResult.Component.IsValid())
 		{
@@ -178,12 +178,14 @@ FLagCompensationResult ULatencyCompensationComponent::ProjConfirmHit(const Frame
 				//DrawDebugBox(GetWorld(), Box->GetComponentLocation(), Box->GetScaledBoxExtent(), FQuat(Box->GetComponentRotation()), FColor::Red, false, 8.f);
 			}
 		}
-		ResetBoxes(HitChar, CurrFrame);
-		EnableMeshCollision(HitChar, ECollisionEnabled::QueryAndPhysics);
-		return FLagCompensationResult{ true, true };
+			UE_LOG(LogTemp, Warning, TEXT("Head hit"));
+			ResetBoxes(HitChar, CurrFrame);
+			EnableMeshCollision(HitChar, ECollisionEnabled::QueryAndPhysics);
+			return FLagCompensationResult{ true, true };
+		    
 
 	}
-	else //did not hit the head  
+	else //did not hit the head and not in the box
 	{
 		for (auto& HitBoxPair : HitChar->HitCollisionBoxes)
 		{
@@ -205,17 +207,21 @@ FLagCompensationResult ULatencyCompensationComponent::ProjConfirmHit(const Frame
 					//DrawDebugBox(GetWorld(), Box->GetComponentLocation(), Box->GetScaledBoxExtent(), FQuat(Box->GetComponentRotation()), FColor::Blue, false, 8.f);
 				}
 			}
-			ResetBoxes(HitChar, CurrFrame);
-			EnableMeshCollision(HitChar, ECollisionEnabled::QueryAndPhysics);
-			return FLagCompensationResult{ true, false };
+
+				UE_LOG(LogTemp, Warning, TEXT("Body hit"));
+				ResetBoxes(HitChar, CurrFrame);
+				EnableMeshCollision(HitChar, ECollisionEnabled::QueryAndPhysics);
+				return FLagCompensationResult{ true, false };
+			
 		}
 	}
 
+	UE_LOG(LogTemp, Warning, TEXT("No hit"));
 	ResetBoxes(HitChar, CurrFrame);
 	EnableMeshCollision(HitChar, ECollisionEnabled::QueryAndPhysics);
 	return FLagCompensationResult{ false, false };
 }
-
+//end 
 void ULatencyCompensationComponent::CacheBoxPos(AMainCharacter* HitChar, FramePackage& OutFramePack)
 {
 	if (HitChar == nullptr) return;
@@ -287,8 +293,6 @@ void ULatencyCompensationComponent::FramePackageStory(const FramePackage& Pack, 
 }
 FLagCompensationResult  ULatencyCompensationComponent::LagCompensationAlgorithm(AMainCharacter* HitChar, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime)
 {
-	AWall* wall;
-	
 	FramePackage FrameToCheck = GetFrameToCheck(HitChar, HitTime);
 	return ConfirmHit(FrameToCheck, HitChar, TraceStart, HitLocation);
 }
@@ -296,6 +300,10 @@ FLagCompensationResult  ULatencyCompensationComponent::LagCompensationAlgorithm(
 FLagCompensationResult ULatencyCompensationComponent::ProjectileLagCompensation(AMainCharacter* HitChar, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100& InitVelocity, float HitTime)
 {
 	FramePackage FrameToCheck = GetFrameToCheck(HitChar, HitTime);
+	/*if (wall->AreaBox->IsOverlappingActor(HitChar))
+	{
+		return FLagCompensationResult{ false,false };
+	}*/
 	return ProjConfirmHit(FrameToCheck, HitChar, TraceStart, InitVelocity, HitTime);
 }
 
@@ -359,22 +367,13 @@ FramePackage ULatencyCompensationComponent::GetFrameToCheck(AMainCharacter* HitC
 	return FrameToCheck;
 }
 
-//
-//void ULatencyCompensationComponent::Score_Request_Implementation(AMainCharacter* HitChar, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime, AWeapon* DamageSource)
-//{
-//	FLagCompensationResult Confirm = LagCompensationAlgorithm(HitChar, TraceStart, HitLocation, HitTime);
-//	if (Character && HitChar && DamageSource && Confirm.bIsHitConfirmed) 
-//	{
-//
-//	}
-//	
-//}
 
 void ULatencyCompensationComponent::ProjectileServerScoreRequest_Implementation(AMainCharacter* HitChar, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100& InitVelocity, float HitTime)
 {
 	FLagCompensationResult Confirm = ProjectileLagCompensation(HitChar, TraceStart, InitVelocity, HitTime);
 	if (Character && HitChar && Confirm.bIsHitConfirmed && Character->GetEquippedWeapon())
 	{
+		
 		UGameplayStatics::ApplyDamage(
 			HitChar,
 			Character->GetEquippedWeapon()->GetDamage(),
@@ -389,6 +388,7 @@ void ULatencyCompensationComponent::TickComponent(float DeltaTime, ELevelTick Ti
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	SaveFramePack();
+	//UE_LOG(LogTemp, Log, TEXT("Bool value is: %d"), wall->insideTheBox);
 }
 
 void ULatencyCompensationComponent::SaveFramePack()

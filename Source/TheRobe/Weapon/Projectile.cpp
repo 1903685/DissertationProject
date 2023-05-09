@@ -4,27 +4,34 @@
 #include "Projectile.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "ProjectileActor.h"
+#include "Components/BoxComponent.h"
+#include "TheRobe/TheRobeComponent/Wall.h"
+#include "TheRobe/Character/MainCharacter.h"
 
 void AProjectile::Fire(const FVector& HitTarget)
 {
-	Super::Fire(HitTarget);
 	
+	Super::Fire(HitTarget);
 	APawn* InstigatorPawn = Cast<APawn>(GetOwner());
 	const USkeletalMeshSocket* MuzzleSocket = GetWeaponMesh()->GetSocketByName(FName("MuzzleFlash"));
 	UWorld* World = GetWorld();
+	
+	
 	if (MuzzleSocket && World)
 	{
 		FTransform SockTransform = MuzzleSocket->GetSocketTransform(GetWeaponMesh());
-
+		//AWall* wall;
 		//from muzzleflash socket to hit location 
 		FVector ToTarget = HitTarget - SockTransform.GetLocation();
 		FRotator TargetRot = ToTarget.Rotation();
-
 		FActorSpawnParameters SpawnParameters;
 		SpawnParameters.Owner = GetOwner();
 		SpawnParameters.Instigator = InstigatorPawn;
 		
+	
+
 		AProjectileActor* SpawnedProj = nullptr;
+
 		if (bUseLagCompensation)
 		{
 			if (InstigatorPawn->HasAuthority()) //server
@@ -36,18 +43,22 @@ void AProjectile::Fire(const FVector& HitTarget)
 						SockTransform.GetLocation(),
 						TargetRot,
 						SpawnParameters);
-					SpawnedProj->bUseLagCompensation = false;
-					SpawnedProj->Damage = Damage;
+						SpawnedProj->bUseLagCompensation = false;
+						SpawnedProj->Damage = Damage;
+				
+					
+						
+						
 				}
 				else  //server, not locally controlled - spawn not replicated proj  
 				{
-					SpawnedProj = World->SpawnActor<AProjectileActor>(
-						LCAProjectileClass,
-						SockTransform.GetLocation(),
-						TargetRot,
-						SpawnParameters);
-				     	SpawnedProj->bUseLagCompensation = true;
-				
+
+						SpawnedProj = World->SpawnActor<AProjectileActor>(
+							LCAProjectileClass,
+							SockTransform.GetLocation(),
+							TargetRot,
+							SpawnParameters);
+						SpawnedProj->bUseLagCompensation = true;
 				}
 			}
 			else // client using LCA

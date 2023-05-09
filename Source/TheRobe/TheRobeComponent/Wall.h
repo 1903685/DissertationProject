@@ -37,13 +37,21 @@ public:
 			int32 OtherBodyIndex
 		);
 
-private:
 	UPROPERTY(VisibleAnywhere, Category = "Wall Properties")
-	UStaticMeshComponent* WallMesh;
+		UStaticMeshComponent* WallMesh;
 
 	//box component is used for collison 
 	UPROPERTY(VisibleAnywhere, Category = "Wall Properties")
-	class UBoxComponent* AreaBox;
+		class UBoxComponent* AreaBox;
+
+	UPROPERTY(VisibleAnywhere, Category = "Wall Properties")
+	int insideTheBox = 0;
+
+	UPROPERTY()
+	class ULatencyCompensationComponent* LCC;
+
+private:
+
 
 	UPROPERTY()
 	class AWeapon* Weapon;
